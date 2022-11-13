@@ -20,7 +20,7 @@ const studentSchema = new mongoose.Schema(
         },
         department :{
             type:String,
-            enum: ['AI&DS','AU', 'AE','BT','CE','CSE','ECE','EEE',,'FT', 'IT', 'ISE','TT' ],
+            enum: ['AD','AU', 'AE','BT','CE','CS','EC','EE',,'FT', 'IT', 'IS','TT' ],
             default:'IT',
             required:true
         },
@@ -87,7 +87,7 @@ const facultySchema = new mongoose.Schema(
         },
         department :{
             type:String,
-            enum: ['AI&DS','AU', 'AE','BT','CE','CSE','ECE','EEE',,'FT', 'IT', 'ISE','TT' ],
+            enum: ['AD','AU', 'AE','BT','CE','CS','EC','EE',,'FT', 'IT', 'IS','TT' ],
             default:'IT',
             required:true
         },

@@ -11,7 +11,7 @@ const Course = item.Course
 router.get('/',async (req,res)=>{
     try{
         res.status(200).json({
-            message:"THis is homepage.Go to /faculties or /students to see details"
+            message:"This is homepage.Go to /faculties or /students to see details"
         })
     }
     catch(error){
@@ -51,27 +51,28 @@ router.post('/add-student', async (req, res) => {
 // Update student..
 router.put('/update-student',async (req,res)=>{
     const filter =  {rollNo:req.body.rollNo}  //using this field , we filter these datas..
-    // const updatedData = {
-    //     name:req.body.name,
-    //     admissionNo:req.body.admissionNo,
-    //     DOB:req.body.DOB,
-    //     email:req.body.email,
-    //     batchYear:req.body.batchYear,
-    //     department:req.body.department,
-    //     batchYear:req.body.batchYear,
-    //     addressLine1:req.body.addressLine1,
-    //     addressLine2:req.body.addressLine2,
-    //     city:req.body.city,
-    //     state:req.body.state,
-    //     parentName:req.body.parentName,
-    //     phoneNum:req.body.phoneNum
-    // }
-
-    const updatedData = { $set:
-        {
-         "name" :req.body.name
-        }
+    const updatedData = {
+        name:req.body.name,
+        admissionNo:req.body.admissionNo,
+        DOB:req.body.DOB,
+        email:req.body.email,
+        batchYear:req.body.batchYear,
+        department:req.body.department,
+        batchYear:req.body.batchYear,
+        addressLine1:req.body.addressLine1,
+        addressLine2:req.body.addressLine2,
+        city:req.body.city,
+        state:req.body.state,
+        parentName:req.body.parentName,
+        phoneNum:req.body.phoneNum
     }
+
+    // const updatedData = { $set:
+    //     {
+    //      "name" :req.body.name
+    //     }
+    // }
+    
     const dataItem = await Student.updateOne(filter,updatedData).then((data)=>{
         res.json({
             data:data,
