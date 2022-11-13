@@ -57,20 +57,15 @@ router.post('/add-student', async (req, res) => {
         await batch.save()
     }
     else {
-        await Batch.updateOne(
+        const batch = await Batch.updateOne(
             { dept: department , batchYear:batchYear},   //filter data
             { $push: { students: rollNo } },  //data to be inserted
-        ).then((data)=>{
-            res.json({
-                data: data,
-            })
-        }).catch((err)=>{
-            return res.send(err);
-        });
+        )
     }
 
     return res.status(200).json({
         student: { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, parentName, phoneNum },
+        success : "Student added sucessfully"
     })
 });
 
@@ -103,6 +98,7 @@ router.put('/update-student', async (req, res) => {
     const dataItem = await Student.updateOne(filter, updatedData).then((data) => {
         res.json({
             data: data,
+            success : "Student updated sucessfully"
         })
     }).catch((err) => {
         return res.send(err);
@@ -127,7 +123,8 @@ router.delete('/delete-student', async (req, res) => {
             { $pull: { students: rollNo } },  //data to be deleted
         )
         res.status(200).json({
-            student:dataItem
+            student:dataItem,
+            success : "Student deleted sucessfully"
         })
     } catch (error) {
         res.send(error)
@@ -159,6 +156,7 @@ router.post('/add-faculty', async (req, res) => {
     // if status is 200 , just send that..
     return res.status(200).json({
         faculty: { facultyId, name, DOB, DOJ, department, email, addressLine1, addressLine2, city, state, phoneNum },
+        success : "Faculty added sucessfully"
     })
 });
 
@@ -182,6 +180,7 @@ router.put('/update-faculty', async (req, res) => {
     const dataItem = await Faculty.updateOne(filter, updatedData).then((data) => {
         res.json({
             data: data,
+            success : "Faculty updated sucessfully"
         })
     }).catch((err) => {
         return res.send(err);
@@ -195,6 +194,7 @@ router.delete('/delete-faculty', async (req, res) => {
     await Faculty.deleteOne(filter).then((data) => {
         res.json({
             data: data,
+            success : "Faculty deleted sucessfully"
         })
     }).catch((err) => {
         return res.send(err);
@@ -225,6 +225,7 @@ router.post('/add-course', async (req, res) => {
     // if status is 200 , just send that..
     return res.status(200).json({
         course: { _id, name, semNo, offeredBy, hours, credits, facultyId },
+        success : "Course added sucessfully"
     })
 });
 
@@ -235,6 +236,7 @@ router.delete('/delete-course', async (req, res) => {
     await Course.deleteOne(filter).then((data) => {
         res.json({
             data: data,
+            success : "Course deleted sucessfully"
         })
     }).catch((err) => {
         return res.send(err);
@@ -256,6 +258,7 @@ router.put('/update-course', async (req, res) => {
     const dataItem = await Course.updateOne(filter, updatedData).then((data) => {
         res.json({
             data: data,
+            success : "Course updated sucessfully"
         })
     }).catch((err) => {
         return res.send(err);
