@@ -125,4 +125,38 @@ const Faculty = mongoose.model('Faculty', facultySchema);
 
 
 
-module.exports = {Student,Faculty}
+const CourseSchema = new mongoose.Schema({
+    _id:{
+        type:String,
+        required:true
+    },
+    name:{
+        type:String,
+        required:true
+    },
+    semNo:{
+        type:Number,
+        requied:true
+    },
+    offeredBy:{
+        type:String,
+        required:true
+    },
+    hours:{
+        type:Number,
+        required:true
+    },
+    credits:{
+        type:Number,
+        required:true
+    },
+    facultyId:{
+        type:String,
+        required:true
+    }
+})
+
+const Course = mongoose.model('Course', CourseSchema);
+
+
+module.exports = {Student,Faculty,Course}
