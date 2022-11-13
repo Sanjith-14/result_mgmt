@@ -159,4 +159,24 @@ const CourseSchema = new mongoose.Schema({
 const Course = mongoose.model('Course', CourseSchema);
 
 
-module.exports = {Student,Faculty,Course}
+const batchSchema = new mongoose.Schema({
+    batchYear:{
+        type:Number,
+        min:2020,
+        required:true
+    },
+    dept:{
+        type:String,
+        required:true
+    },
+    students:{
+        type:Array,
+        default: [] ,
+        required:true
+    }
+})
+
+const Batch = mongoose.model('Batch',batchSchema)
+
+
+module.exports = {Student,Faculty,Course,Batch}
