@@ -45,15 +45,15 @@ router.get('/student-detail/:rollNo', async (req, res) => {
     try {
         var rollNo = req.params.rollNo;
 
-        const dataItem = await Student.find({ rollNo:rollNo })
+        const dataItem = await Student.find({ rollNo: rollNo })
         console.log(dataItem)
-        if(dataItem.length==0){
+        if (dataItem.length == 0) {
             res.json({
-                message : "Invalid Student"
+                message: "Invalid Student"
             })
         }
         // console.log(dataItem.length())
-        else{
+        else {
             res.status(200).json({
                 studentDetail: dataItem
             })
@@ -68,30 +68,30 @@ router.get('/student-detail/:rollNo', async (req, res) => {
 
 // Post request for add student
 router.post('/add-student', async (req, res) => {
-    const { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, parentName, phoneNum , parentNum } = req.body;
+    const { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, parentName, phoneNum, parentNum } = req.body;
     //save in db
-    const student = new Student({ rollNo: rollNo, name: name, admissionNo: admissionNo, DOB: DOB, email: email, batchYear: batchYear, department: department, batchYear: batchYear, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, parentName: parentName, phoneNum: phoneNum , parentNum:parentNum })
+    const student = new Student({ rollNo: rollNo, name: name, admissionNo: admissionNo, DOB: DOB, email: email, batchYear: batchYear, department: department, batchYear: batchYear, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, parentName: parentName, phoneNum: phoneNum, parentNum: parentNum })
     await student.save()
     // if status is 200 , just send that..
 
-    
+
     const batchItem = await Batch.find({ batchYear: batchYear, dept: department })
     // console.log(batchItem)
     // console.log(batchItem.length)
     if (batchItem.length == 0) {
-        const batch = new Batch({ batchYear: batchYear, dept: department, currentSem:1, students: [rollNo] , courses:[] })
+        const batch = new Batch({ batchYear: batchYear, dept: department, currentSem: 1, students: [rollNo], courses: [] })
         await batch.save()
     }
     else {
         const batch = await Batch.updateOne(
-            { dept: department , batchYear:batchYear},   //filter data
+            { dept: department, batchYear: batchYear },   //filter data
             { $push: { students: rollNo } },  //data to be inserted
         )
     }
 
     return res.status(200).json({
         student: { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, parentName, phoneNum },
-        success : "Student added sucessfully"
+        success: "Student added sucessfully"
     })
 });
 
@@ -124,7 +124,7 @@ router.put('/update-student', async (req, res) => {
     const dataItem = await Student.updateOne(filter, updatedData).then((data) => {
         res.json({
             data: data,
-            success : "Student updated sucessfully"
+            success: "Student updated sucessfully"
         })
     }).catch((err) => {
         return res.send(err);
@@ -138,19 +138,19 @@ router.delete('/delete-student', async (req, res) => {
         const filter = { rollNo: req.body.rollNo }  //using this field , we filter these datas..
         // Fetch the student using roll number
 
-        const studentDetail = await Student.find({rollNo:req.body.rollNo})
+        const studentDetail = await Student.find({ rollNo: req.body.rollNo })
         // console.log(studentDetail[0])
         rollNo = studentDetail[0].rollNo
         batchYear = studentDetail[0].batchYear
         department = studentDetail[0].department
         const dataItem = await Student.deleteOne(filter)
         const batchItem = await Batch.updateOne(
-            { dept: department , batchYear:batchYear}, //filter data
+            { dept: department, batchYear: batchYear }, //filter data
             { $pull: { students: rollNo } },  //data to be deleted
         )
         res.status(200).json({
-            student:dataItem,
-            success : "Student deleted sucessfully"
+            student: dataItem,
+            success: "Student deleted sucessfully"
         })
     } catch (error) {
         res.send(error)
@@ -178,8 +178,8 @@ router.get('/faculties', async (req, res) => {
 router.get('/faculties-id', async (req, res) => {
     try {
         const facultyIds = [];
-        const dataItem = await Faculty.find({}).select({facultyId:1 , _id:0})
-        dataItem.forEach((val)=>{
+        const dataItem = await Faculty.find({}).select({ facultyId: 1, _id: 0 })
+        dataItem.forEach((val) => {
             facultyIds.push(val.facultyId)
         })
         // console.log(facultyIds)
@@ -202,7 +202,7 @@ router.post('/add-faculty', async (req, res) => {
     // if status is 200 , just send that..
     return res.status(200).json({
         faculty: { facultyId, name, DOB, DOJ, department, email, addressLine1, addressLine2, city, state, phoneNum },
-        success : "Faculty added sucessfully"
+        success: "Faculty added sucessfully"
     })
 });
 
@@ -226,7 +226,7 @@ router.put('/update-faculty', async (req, res) => {
     const dataItem = await Faculty.updateOne(filter, updatedData).then((data) => {
         res.json({
             data: data,
-            success : "Faculty updated sucessfully"
+            success: "Faculty updated sucessfully"
         })
     }).catch((err) => {
         return res.send(err);
@@ -240,7 +240,7 @@ router.delete('/delete-faculty', async (req, res) => {
     await Faculty.deleteOne(filter).then((data) => {
         res.json({
             data: data,
-            success : "Faculty deleted sucessfully"
+            success: "Faculty deleted sucessfully"
         })
     }).catch((err) => {
         return res.send(err);
@@ -261,17 +261,38 @@ router.get('/courses', async (req, res) => {
     }
 })
 
+//Get all courses for particular sem
+router.get('/courses/sem:semNo', async (req, res) => {
+    try {
+        const dataItem = await Course.find({ semNo: req.params.semNo })
+        if (dataItem.length == 0) {
+            res.json({
+                course: "Invalid sem"
+            })
+        }
+        // console.log(dataItem.length())
+        else {
+            res.status(200).json({
+                course: dataItem
+            })
+        }
+
+    }
+    catch (error) {
+        return res.send(error)
+    }
+})
 
 // Post request for add course
 router.post('/add-course', async (req, res) => {
-    const { _id, name, semNo, offeredBy,type, hours, credits, facultyId } = req.body;
+    const { _id, name, semNo, offeredBy, type, hours, credits, facultyId } = req.body;
     //save in db
-    const course = new Course({ _id: _id, name: name, semNo: semNo, offeredBy: offeredBy,type:type, hours: hours, credits: credits, facultyId: facultyId })
+    const course = new Course({ _id: _id, name: name, semNo: semNo, offeredBy: offeredBy, type: type, hours: hours, credits: credits, facultyId: facultyId })
     await course.save()
     // if status is 200 , just send that..
     return res.status(200).json({
-        course: { _id, name, semNo, offeredBy,type, hours, credits, facultyId },
-        success : "Course added sucessfully"
+        course: { _id, name, semNo, offeredBy, type, hours, credits, facultyId },
+        success: "Course added sucessfully"
     })
 });
 
@@ -282,7 +303,7 @@ router.delete('/delete-course', async (req, res) => {
     await Course.deleteOne(filter).then((data) => {
         res.json({
             data: data,
-            success : "Course deleted sucessfully"
+            success: "Course deleted sucessfully"
         })
     }).catch((err) => {
         return res.send(err);
@@ -304,7 +325,7 @@ router.put('/update-course', async (req, res) => {
     const dataItem = await Course.updateOne(filter, updatedData).then((data) => {
         res.json({
             data: data,
-            success : "Course updated sucessfully"
+            success: "Course updated sucessfully"
         })
     }).catch((err) => {
         return res.send(err);
@@ -326,5 +347,17 @@ router.get('/batches', async (req, res) => {
     }
 })
 
+// Batch add courses - enroll..
+router.put('/batch-add-course', async (req, res) => {
+    const batch = await Batch.updateOne(
+        { dept: req.body.department, batchYear: req.body.batchYear },   //filter data
+        { $set: { currentCourses: [...req.body.courses] } },  //data to be inserted
+    ).then((data) => {
+        res.json({
+            batch: data,
+            success: "Enrolled successfully"
+        })
+    })
+})
 
 module.exports = router;
