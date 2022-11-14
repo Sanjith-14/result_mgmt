@@ -40,7 +40,7 @@ router.get('/students', async (req, res) => {
 })
 
 
-
+//To get the detail of particular student
 router.get('/student-detail/:rollNo', async (req, res) => {
     try {
         var rollNo = req.params.rollNo;
@@ -173,6 +173,26 @@ router.get('/faculties', async (req, res) => {
 })
 
 
+
+// Get all Faculties is..
+router.get('/faculties-id', async (req, res) => {
+    try {
+        const facultyIds = [];
+        const dataItem = await Faculty.find({}).select({facultyId:1 , _id:0})
+        dataItem.forEach((val)=>{
+            facultyIds.push(val.facultyId)
+        })
+        // console.log(facultyIds)
+        res.status(200).json({
+            faculty: facultyIds
+        })
+    }
+    catch (error) {
+        return res.send(error)
+    }
+})
+
+
 // Post request for add faculty
 router.post('/add-faculty', async (req, res) => {
     const { facultyId, name, DOB, DOJ, department, email, addressLine1, addressLine2, city, state, phoneNum } = req.body;
@@ -244,13 +264,13 @@ router.get('/courses', async (req, res) => {
 
 // Post request for add course
 router.post('/add-course', async (req, res) => {
-    const { _id, name, semNo, offeredBy, hours, credits, facultyId } = req.body;
+    const { _id, name, semNo, offeredBy,type, hours, credits, facultyId } = req.body;
     //save in db
-    const course = new Course({ _id: _id, name: name, semNo: semNo, offeredBy: offeredBy, hours: hours, credits: credits, facultyId: facultyId })
+    const course = new Course({ _id: _id, name: name, semNo: semNo, offeredBy: offeredBy,type:type, hours: hours, credits: credits, facultyId: facultyId })
     await course.save()
     // if status is 200 , just send that..
     return res.status(200).json({
-        course: { _id, name, semNo, offeredBy, hours, credits, facultyId },
+        course: { _id, name, semNo, offeredBy,type, hours, credits, facultyId },
         success : "Course added sucessfully"
     })
 });

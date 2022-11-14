@@ -148,6 +148,11 @@ const CourseSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    type:{
+        type :String,
+        enum: ['Theory','Embedded', 'Lab' ],
+        required:true,
+    },
     hours:{
         type:Number,
         required:true
@@ -158,6 +163,7 @@ const CourseSchema = new mongoose.Schema({
     },
     facultyId:{
         type:String,
+        // ref:Faculty,
         required:true
     }
 })
