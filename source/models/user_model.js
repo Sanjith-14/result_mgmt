@@ -189,7 +189,7 @@ const batchSchema = new mongoose.Schema({
         default: [] ,
         required:true
     },
-    courses:{
+    currentCourses:{
         type:Array,
         default:[],
         required:true
