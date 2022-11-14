@@ -25,8 +25,8 @@ router.get('/', async (req, res) => {
 // by department , batch
 router.get('/students', async (req, res) => {
     try {
-        var dept = 'IT'
-        var batch = 2020  //take from front-end
+        var dept = req.body.department
+        var batch = req.body.batchYear  //take from front-end
 
         const dataItem = await Student.find({ department: dept, batchYear: batch })
         res.status(200).json({
@@ -41,15 +41,23 @@ router.get('/students', async (req, res) => {
 
 
 
-router.get('/student-detail', async (req, res) => {
+router.get('/student-detail/:rollNo', async (req, res) => {
     try {
-        var rollNo = "20BIT450"
+        var rollNo = req.params.rollNo;
 
         const dataItem = await Student.find({ rollNo:rollNo })
-        console.log(dataItem[0])
-        res.status(200).json({
-            studentDetail: dataItem
-        })
+        console.log(dataItem)
+        if(dataItem.length==0){
+            res.json({
+                message : "Invalid Student"
+            })
+        }
+        // console.log(dataItem.length())
+        else{
+            res.status(200).json({
+                studentDetail: dataItem
+            })
+        }
 
     }
     catch (error) {
@@ -60,9 +68,9 @@ router.get('/student-detail', async (req, res) => {
 
 // Post request for add student
 router.post('/add-student', async (req, res) => {
-    const { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, parentName, phoneNum } = req.body;
+    const { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, parentName, phoneNum , parentNum } = req.body;
     //save in db
-    const student = new Student({ rollNo: rollNo, name: name, admissionNo: admissionNo, DOB: DOB, email: email, batchYear: batchYear, department: department, batchYear: batchYear, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, parentName: parentName, phoneNum: phoneNum })
+    const student = new Student({ rollNo: rollNo, name: name, admissionNo: admissionNo, DOB: DOB, email: email, batchYear: batchYear, department: department, batchYear: batchYear, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, parentName: parentName, phoneNum: phoneNum , parentNum:parentNum })
     await student.save()
     // if status is 200 , just send that..
 
@@ -71,7 +79,7 @@ router.post('/add-student', async (req, res) => {
     // console.log(batchItem)
     // console.log(batchItem.length)
     if (batchItem.length == 0) {
-        const batch = new Batch({ batchYear: batchYear, dept: department, students: [rollNo] })
+        const batch = new Batch({ batchYear: batchYear, dept: department, currentSem:1, students: [rollNo] , courses:[] })
         await batch.save()
     }
     else {

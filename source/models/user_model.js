@@ -59,6 +59,12 @@ const studentSchema = new mongoose.Schema(
             maxLength :12,
             minLenngth:9
         },
+        parentNum :{
+            type:String,
+            required:true,
+            maxLength :12,
+            minLenngth:9
+        },
 
     }
 )
@@ -169,9 +175,23 @@ const batchSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    currentSem:{
+        type:Number,
+        required:true
+    },
+    // classAdvisor:{
+    //     type:String,
+    //     required:true,
+    //     ref : Faculty  //foreign key..
+    // },
     students:{
         type:Array,
         default: [] ,
+        required:true
+    },
+    courses:{
+        type:Array,
+        default:[],
         required:true
     }
 })
