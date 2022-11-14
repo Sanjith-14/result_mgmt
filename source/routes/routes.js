@@ -40,6 +40,24 @@ router.get('/students', async (req, res) => {
 })
 
 
+
+router.get('/student-detail', async (req, res) => {
+    try {
+        var rollNo = "20BIT450"
+
+        const dataItem = await Student.find({ rollNo:rollNo })
+        console.log(dataItem[0])
+        res.status(200).json({
+            studentDetail: dataItem
+        })
+
+    }
+    catch (error) {
+        return res.send(error)
+    }
+})
+
+
 // Post request for add student
 router.post('/add-student', async (req, res) => {
     const { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, parentName, phoneNum } = req.body;
@@ -264,5 +282,21 @@ router.put('/update-course', async (req, res) => {
         return res.send(err);
     })
 })
+
+
+// Get all batches
+router.get('/batches', async (req, res) => {
+    try {
+        const dataItem = await Batch.find({})
+        res.status(200).json({
+            batches: dataItem
+        })
+
+    }
+    catch (error) {
+        return res.send(error)
+    }
+})
+
 
 module.exports = router;
