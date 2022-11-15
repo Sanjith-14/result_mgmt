@@ -6,6 +6,7 @@ const Student = item.Student
 const Faculty = item.Faculty
 const Course = item.Course
 const Batch = item.Batch
+const Enroll = item.Enroll
 
 //Getting ready(Home page)..
 router.get('/', async (req, res) => {
@@ -46,7 +47,7 @@ router.get('/student-detail/:rollNo', async (req, res) => {
         var rollNo = req.params.rollNo;
 
         const dataItem = await Student.find({ rollNo: rollNo })
-        console.log(dataItem)
+        // console.log(dataItem)
         if (dataItem.length == 0) {
             res.json({
                 message: "Invalid Student"
@@ -349,9 +350,18 @@ router.get('/batches', async (req, res) => {
 
 // Batch add courses - enroll..
 router.put('/batch-add-course', async (req, res) => {
+    const department = req.body.department
+    const batchYear = req.body.batchYear
+    const courses = req.body.courses //array
+    const faculties = req.body.faculties //array
+    const currentSem = req.body.currentSem
+    for (let i = 0; i < courses.length; i++) {
+        const enrollment = new Enroll({batchYear:batchYear,department:department,courseId:courses[i],facultyId:faculties[i],semNo:currentSem,isCompleted:false})
+        await enrollment.save()
+    }
     const batch = await Batch.updateOne(
-        { dept: req.body.department, batchYear: req.body.batchYear },   //filter data
-        { $set: { currentCourses: [...req.body.courses] } },  //data to be inserted
+        { dept: department, batchYear: batchYear },   //filter data
+        { $set: { currentCourses: [...courses] } },  //data to be inserted
     ).then((data) => {
         res.json({
             batch: data,
@@ -360,4 +370,12 @@ router.put('/batch-add-course', async (req, res) => {
     })
 })
 
+
+// Adding result to student
+
 module.exports = router;
+
+
+// const dept = {"theory" : ["cat1","cat2","sem"],
+// "embedded" : ["cat1","cat2","sem","lab"],
+// "lab" : ["lab"]}

@@ -1,5 +1,61 @@
 const mongoose = require('mongoose')
 
+
+
+
+//  Result Schema starts..
+const subjectSchema = new mongoose.Schema({
+    cat1:{
+        type:Number,
+        required:true
+    },
+    cat2:{
+        type:Number,
+        required:true
+    },
+    sem:{
+        type:Number,
+        required:true,
+    },
+    lab:{
+        type:Number
+    },
+    grade:{
+        type:String,
+        // required:true
+    }
+})
+
+const courseWithMarks = new mongoose.Schema({
+    courseId:{
+        type:String,
+        required:true
+    },
+    marks:{
+        type:subjectSchema,
+        required:true
+    }
+})
+
+const semesterSchema = new mongoose.Schema({
+    semNo:{
+        type:Number,
+        required:true
+    },
+    subjectMarks :{
+        type : [courseWithMarks] ,
+        // type:[subjectSchema],
+        required:true
+    }
+})
+
+// Result Schema ends..
+
+
+
+
+
+
 const studentSchema = new mongoose.Schema(
     {  
         rollNo :{
@@ -65,6 +121,10 @@ const studentSchema = new mongoose.Schema(
             maxLength :12,
             minLenngth:9
         },
+        result :{
+            type:[semesterSchema],
+            default:[],
+        }
 
     }
 )
@@ -205,4 +265,34 @@ const batchSchema = new mongoose.Schema({
 const Batch = mongoose.model('Batch',batchSchema)
 
 
-module.exports = {Student,Faculty,Course,Batch}
+// Enrollment..
+const enrollSchema = new mongoose.Schema({
+    batchYear:{
+        type:String,
+        required:true
+    },
+    department:{
+        type:String,
+        required:true
+    },
+    courseId:{
+        type:String,
+        required:true
+    },
+    facultyId:{
+        type:String,
+        requied:true
+    },
+    semNo:{
+        type:Number,
+        required:true
+    },
+    isCompleted:{
+        type:Boolean,
+        default:false
+    }
+})
+
+const Enroll = mongoose.model('Enroll',enrollSchema)
+
+module.exports = {Student,Faculty,Course,Batch,Enroll}
