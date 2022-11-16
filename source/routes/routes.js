@@ -6,7 +6,7 @@ const Student = item.Student
 const Faculty = item.Faculty
 const Course = item.Course
 const Batch = item.Batch
-const Enroll = item.Enroll
+const Enrollment = item.Enrollment
 
 //Getting ready(Home page)..
 router.get('/', async (req, res) => {
@@ -352,11 +352,12 @@ router.get('/batches', async (req, res) => {
 router.put('/batch-add-course', async (req, res) => {
     const department = req.body.department
     const batchYear = req.body.batchYear
-    const courses = req.body.courses //array
+    const courseId = req.body.courseId //array
+    const courseName = req.body.courseName
     const faculties = req.body.faculties //array
     const currentSem = req.body.currentSem
-    for (let i = 0; i < courses.length; i++) {
-        const enrollment = new Enroll({batchYear:batchYear,department:department,courseId:courses[i],facultyId:faculties[i],semNo:currentSem,isCompleted:false})
+    for (let i = 0; i < courseId.length; i++) {
+        const enrollment = new Enrollment({batchYear:batchYear,department:department,courseId:courseId[i],courseName:courseName[i], facultyId:faculties[i],semNo:currentSem,isCompleted:false})
         await enrollment.save()
     }
     const batch = await Batch.updateOne(
@@ -372,6 +373,48 @@ router.put('/batch-add-course', async (req, res) => {
 
 
 // Adding result to student
+router.put('/faculty-add-result',(req,res)=>{
+    var len=0;
+    const itema = {"20BIT047":40,"20BIT045":45};
+    // for (let i in itema){
+    //     // console.log(i);
+    //     // console.log(itema[i])
+    //     // len+=1;
+    //     const filter = { rollNo: i }
+    // }
+    console.log(Result.find({}))
+
+    //try this
+    // const data = await Result.find({})
+    // console.log(data[0].result[0].subjectMarks)
+    
+})
+
+
+// To get courses based on faculty id
+router.get('/courses/:facultyId', async (req, res) => {
+    try {
+        const dataItem = await Enrollment.find({facultyId:req.params.facultyId})
+        if(dataItem.length == 0){
+            res.status(200).json({
+                message:"No courses"
+            })
+        }
+        else{
+            res.status(200).json({
+                courses: dataItem
+            })
+        }
+
+    }
+    catch (error) {
+        return res.send(error)
+    }
+})
+
+
+
+
 
 module.exports = router;
 

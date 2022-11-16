@@ -85,7 +85,7 @@ const studentSchema = new mongoose.Schema(
             required:true
         },
         batchYear:{
-            type:Number,
+            type:String,
             min:2020,
             required:true
         },
@@ -233,7 +233,7 @@ const Course = mongoose.model('Course', CourseSchema);
 
 const batchSchema = new mongoose.Schema({
     batchYear:{
-        type:Number,
+        type:String,
         min:2020,
         required:true
     },
@@ -279,6 +279,10 @@ const enrollSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    courseName:{
+        type:String,
+        required:true
+    },
     facultyId:{
         type:String,
         requied:true
@@ -293,6 +297,6 @@ const enrollSchema = new mongoose.Schema({
     }
 })
 
-const Enroll = mongoose.model('Enroll',enrollSchema)
+const Enrollment = mongoose.model('Enroll',enrollSchema)
 
-module.exports = {Student,Faculty,Course,Batch,Enroll}
+module.exports = {Student,Faculty,Course,Batch,Enrollment}
