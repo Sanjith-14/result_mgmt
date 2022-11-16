@@ -69,9 +69,9 @@ router.get('/student-detail/:rollNo', async (req, res) => {
 
 // Post request for add student
 router.post('/add-student', async (req, res) => {
-    const { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, parentName, phoneNum, parentNum } = req.body;
+    const { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, country,parentName, phoneNum, parentNum } = req.body;
     //save in db
-    const student = new Student({ rollNo: rollNo, name: name, admissionNo: admissionNo, DOB: DOB, email: email, batchYear: batchYear, department: department, batchYear: batchYear, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, parentName: parentName, phoneNum: phoneNum, parentNum: parentNum })
+    const student = new Student({ rollNo: rollNo, name: name, admissionNo: admissionNo, DOB: DOB, email: email, batchYear: batchYear, department: department, batchYear: batchYear, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country:country , parentName: parentName, phoneNum: phoneNum, parentNum: parentNum })
     await student.save()
     // if status is 200 , just send that..
 
@@ -91,7 +91,7 @@ router.post('/add-student', async (req, res) => {
     }
 
     return res.status(200).json({
-        student: { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, parentName, phoneNum },
+        student: { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state,country, parentName, phoneNum },
         success: "Student added sucessfully"
     })
 });
@@ -112,6 +112,7 @@ router.put('/update-student', async (req, res) => {
         addressLine2: req.body.addressLine2,
         city: req.body.city,
         state: req.body.state,
+        country:req.body.country,
         parentName: req.body.parentName,
         phoneNum: req.body.phoneNum
     }
