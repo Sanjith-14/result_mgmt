@@ -402,7 +402,7 @@ router.get('/courses/:facultyId', async (req, res) => {
         }
         else{
             res.status(200).json({
-                courses: dataItem
+                classes: dataItem
             })
         }
 
