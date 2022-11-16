@@ -26,10 +26,11 @@ router.get('/', async (req, res) => {
 // by department , batch
 router.get('/students', async (req, res) => {
     try {
-        var dept = req.body.department
-        var batch = req.body.batchYear  //take from front-end
+        var department = "IT"
+        var batchYear = "2024"  //take from front-end
 
-        const dataItem = await Student.find({ department: dept, batchYear: batch })
+        const dataItem = await Batch.find({ batchYear: batchYear, dept: department })
+        // 
         res.status(200).json({
             student: dataItem
         })
@@ -374,7 +375,7 @@ router.put('/batch-add-course', async (req, res) => {
 
 
 // Adding result to student
-router.put('/faculty-add-result',(req,res)=>{
+router.put('/faculty-add-result',async (req,res)=>{
     var len=0;
     const itema = {"20BIT047":40,"20BIT045":45};
     // for (let i in itema){
@@ -383,11 +384,11 @@ router.put('/faculty-add-result',(req,res)=>{
     //     // len+=1;
     //     const filter = { rollNo: i }
     // }
-    console.log(Result.find({}))
+    // console.log(Result.find({}))
 
     //try this
-    // const data = await Result.find({})
-    // console.log(data[0].result[0].subjectMarks)
+    const data = await Result.find({})
+    console.log(data[0].result[0].subjectMarks)
     
 })
 
