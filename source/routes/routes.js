@@ -362,7 +362,7 @@ router.put('/batch-add-course', async (req, res) => {
     }
     const batch = await Batch.updateOne(
         { dept: department, batchYear: batchYear },   //filter data
-        { $set: { currentCourses: [...courses] } },  //data to be inserted
+        { $set: { currentCourses: [...courseId] } },  //data to be inserted
     ).then((data) => {
         res.json({
             batch: data,
