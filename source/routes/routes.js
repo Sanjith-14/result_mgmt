@@ -26,14 +26,20 @@ router.get('/', async (req, res) => {
 // by department , batch
 router.get('/students', async (req, res) => {
     try {
-        var department = "IT"
-        var batchYear = "2024"  //take from front-end
+        var department = req.body.department
+        var batchYear = req.body.batchYear //take from front-end
 
-        const dataItem = await Batch.find({ batchYear: batchYear, dept: department })
-        // 
-        res.status(200).json({
-            student: dataItem
-        })
+        const dataItem = await Student.find({ batchYear: batchYear, dept: department }).select({ rollNo: 1, name:1, _id: 0 })
+        if(dataItem.length == 0){
+            res.status(200).json({
+                message: "No students are there"
+            })
+        }
+        else{
+            res.status(200).json({
+                student: dataItem
+            })
+        }
 
     }
     catch (error) {
@@ -70,9 +76,10 @@ router.get('/student-detail/:rollNo', async (req, res) => {
 
 // Post request for add student
 router.post('/add-student', async (req, res) => {
+    var result = [{"semNo":1 , "subjectMarks":[]},{"semNo":2 , "subjectMarks":[]},{"semNo":3 , "subjectMarks":[]},{"semNo":4 , "subjectMarks":[]},{"semNo":5 , "subjectMarks":[]},{"semNo":6 , "subjectMarks":[]},{"semNo":7 , "subjectMarks":[]},{"semNo":8 , "subjectMarks":[]}]
     const { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, country,parentName, phoneNum, parentNum } = req.body;
     //save in db
-    const student = new Student({ rollNo: rollNo, name: name, admissionNo: admissionNo, DOB: DOB, email: email, batchYear: batchYear, department: department, batchYear: batchYear, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country:country , parentName: parentName, phoneNum: phoneNum, parentNum: parentNum })
+    const student = new Student({ rollNo: rollNo, name: name, admissionNo: admissionNo, DOB: DOB, email: email, batchYear: batchYear, department: department, batchYear: batchYear, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country:country , parentName: parentName, phoneNum: phoneNum, parentNum: parentNum , result:result })
     await student.save()
     // if status is 200 , just send that..
 
@@ -376,20 +383,21 @@ router.put('/batch-add-course', async (req, res) => {
 
 // Adding result to student
 router.put('/faculty-add-result',async (req,res)=>{
-    var len=0;
-    const itema = {"20BIT047":40,"20BIT045":45};
-    // for (let i in itema){
-    //     // console.log(i);
-    //     // console.log(itema[i])
-    //     // len+=1;
-    //     const filter = { rollNo: i }
-    // }
-    // console.log(Result.find({}))
-
-    //try this
-    const data = await Result.find({})
-    console.log(data[0].result[0].subjectMarks)
-    
+    const data = Student.find({rollNo:"20BIT100"})
+    console.log(data.result);
+    // let currentSem = 1;
+    // let examType = "cat1"
+    // const setField = "result.$[resElement].subjectMarks.$[subElement].marks."+examType
+    // let courseId = "U18ITI1000"
+    // let mark = 90
+    // const response =   await Result.updateOne(
+    //     {}, 
+    //     {$set: {[setField] : mark}},
+    //      {arrayFilters:[{"resElement.semNo":currentSem},{"subElement.courseId":courseId}]}
+    // )
+    res.json({
+        message:"wait"
+    })
 })
 
 
