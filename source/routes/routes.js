@@ -359,44 +359,72 @@ router.get('/batches', async (req, res) => {
 
 // Batch add courses - enroll..
 router.put('/batch-add-course', async (req, res) => {
-    const department = req.body.department
-    const batchYear = req.body.batchYear
-    const courseId = req.body.courseId //array
-    const courseName = req.body.courseName
-    const faculties = req.body.faculties //array
-    const currentSem = req.body.currentSem
-    for (let i = 0; i < courseId.length; i++) {
-        const enrollment = new Enrollment({batchYear:batchYear,department:department,courseId:courseId[i],courseName:courseName[i], facultyId:faculties[i],semNo:currentSem,isCompleted:false})
-        await enrollment.save()
-    }
-    const batch = await Batch.updateOne(
-        { dept: department, batchYear: batchYear },   //filter data
-        { $set: { currentCourses: [...courseId] } },  //data to be inserted
-    ).then((data) => {
+    try {
+        const department = req.body.department
+        const batchYear = req.body.batchYear
+        const courseId = req.body.courseId //array
+        const courseName = req.body.courseName
+        const faculties = req.body.faculties //array
+        const currentSem = req.body.currentSem
+        for (let i = 0; i < courseId.length; i++) {
+            const enrollment = new Enrollment({batchYear:batchYear,department:department,courseId:courseId[i],courseName:courseName[i], facultyId:faculties[i],semNo:currentSem,isCompleted:false})
+            await enrollment.save()
+        }
+        const batch = await Batch.updateOne(
+            { dept: department, batchYear: batchYear },   //filter data
+            { $set: { currentCourses: [...courseId] } },  //data to be inserted
+        )
+        
+        // Adding courses in result field for Student.
+        const res1 = await Student.updateMany(
+            {batchYear:batchYear , department:department},
+            {$push:{"result.$[resElement].subjectMarks" : {courseId:courseId , marks:{"cat1":0,"cat2":0,"sem":0,"lab":0} }}},
+            {arrayFilters : [{"resElement.semNo":currentSem}]}
+        )
+        // Added successfully.
         res.json({
-            batch: data,
-            success: "Enrolled successfully"
+            message : "Enrolled Successfully",
+        }) 
+    } catch (error) {
+        res.json({
+            error:error
         })
-    })
+    }
 })
 
 
 // Adding result to student
 router.put('/faculty-add-result',async (req,res)=>{
-    const data = Student.find({rollNo:"20BIT100"})
-    console.log(data.result);
-    // let currentSem = 1;
-    // let examType = "cat1"
-    // const setField = "result.$[resElement].subjectMarks.$[subElement].marks."+examType
-    // let courseId = "U18ITI1000"
-    // let mark = 90
-    // const response =   await Result.updateOne(
-    //     {}, 
-    //     {$set: {[setField] : mark}},
-    //      {arrayFilters:[{"resElement.semNo":currentSem},{"subElement.courseId":courseId}]}
+    // Give result structure to all students..
+
+    // necessary details starts..
+    const studRoll = ["20BIT001","20BIT002"]
+    let examType = "cat1"
+    let courseId = "U18ITI1000"
+    const currentSem = 1
+    const marks = [95,80]
+    // ends
+
+    const setField = "result.$[resElement].subjectMarks.$[subElement].marks."+examType
+    for(let i=0;i<studRoll.length;i++){
+        const response =   await Result.updateOne(
+            {rollNo:studRoll[i]}, 
+            {$set: {[setField] : marks[i]}},
+             {arrayFilters:[{"resElement.semNo":currentSem},{"subElement.courseId":courseId}]}
+        )
+    }
+
+
+
+
+    // const res1 = await Student.updateMany(
+    //     {},
+    //     {$push:{"result.$[resElement].subjectMarks" : {courseId:"U18ITI1000" , marks:{"cat1":0,"cat2":0,"sem":0,"lab":0} }}},
+    //     {arrayFilters : [{"resElement.semNo":1}]}
     // )
+
     res.json({
-        message:"wait"
+        msg1:res1
     })
 })
 
