@@ -376,14 +376,18 @@ router.put('/batch-add-course', async (req, res) => {
         )
         
         // Adding courses in result field for Student.
-        const res1 = await Student.updateMany(
-            {batchYear:batchYear , department:department},
-            {$push:{"result.$[resElement].subjectMarks" : {courseId:courseId , marks:{"cat1":0,"cat2":0,"sem":0,"lab":0} }}},
-            {arrayFilters : [{"resElement.semNo":currentSem}]}
-        )
+        // console.log("Updated");
+        for(let i=0;i<courseId.length;i++){
+            const res1 = await Student.updateMany(
+                {batchYear:batchYear , department:department},
+                {$push:{"result.$[resElement].subjectMarks" : {courseId:courseId[i] , marks:{"cat1":0,"cat2":0,"sem":0,"lab":0} }}},
+                {arrayFilters : [{"resElement.semNo":currentSem}]}
+            )
+        }
+        // console.log("Updated end..");
         // Added successfully.
         res.json({
-            message : "Enrolled Successfully",
+            message : "Enrolled Successfully"
         }) 
     } catch (error) {
         res.json({
@@ -398,17 +402,19 @@ router.put('/faculty-add-result',async (req,res)=>{
     // Give result structure to all students..
 
     // necessary details starts..
-    const studRoll = ["20BIT001","20BIT002"]
-    let examType = "cat1"
-    let courseId = "U18ITI1000"
-    const currentSem = 1
-    const marks = [95,80]
+    const studRollNo = req.body.studRollNo
+    let examType = req.body.examType
+    let courseId = req.body.courseId
+    const currentSem = req.body.currentSem
+    const marks = req.body.marks
     // ends
 
+    
+
     const setField = "result.$[resElement].subjectMarks.$[subElement].marks."+examType
-    for(let i=0;i<studRoll.length;i++){
-        const response =   await Result.updateOne(
-            {rollNo:studRoll[i]}, 
+    for(let i=0;i<studRollNo.length;i++){
+        const response =   await Student.updateOne(
+            {rollNo:studRollNo[i]}, 
             {$set: {[setField] : marks[i]}},
              {arrayFilters:[{"resElement.semNo":currentSem},{"subElement.courseId":courseId}]}
         )
@@ -416,15 +422,8 @@ router.put('/faculty-add-result',async (req,res)=>{
 
 
 
-
-    // const res1 = await Student.updateMany(
-    //     {},
-    //     {$push:{"result.$[resElement].subjectMarks" : {courseId:"U18ITI1000" , marks:{"cat1":0,"cat2":0,"sem":0,"lab":0} }}},
-    //     {arrayFilters : [{"resElement.semNo":1}]}
-    // )
-
     res.json({
-        msg1:res1
+        "message":"Result added successfully"
     })
 })
 
