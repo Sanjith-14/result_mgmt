@@ -29,7 +29,7 @@ router.get('/students', async (req, res) => {
         var department = req.body.department
         var batchYear = req.body.batchYear //take from front-end
 
-        const dataItem = await Student.find({ batchYear: batchYear, dept: department }).select({ rollNo: 1, name:1, _id: 0 })
+        const dataItem = await Batch.find({ batchYear: batchYear, dept: department }).select({ students: 1, _id: 0 })
         if(dataItem.length == 0){
             res.status(200).json({
                 message: "No students are there"
@@ -402,14 +402,12 @@ router.put('/faculty-add-result',async (req,res)=>{
     // Give result structure to all students..
 
     // necessary details starts..
-    const studRollNo = req.body.studRollNo
+    const studRollNo = req.body.studRollNo   //array
     let examType = req.body.examType
     let courseId = req.body.courseId
     const currentSem = req.body.currentSem
-    const marks = req.body.marks
+    const marks = req.body.marks  //array
     // ends
-
-    
 
     const setField = "result.$[resElement].subjectMarks.$[subElement].marks."+examType
     for(let i=0;i<studRollNo.length;i++){
