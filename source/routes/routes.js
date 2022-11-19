@@ -32,12 +32,12 @@ router.get('/students', async (req, res) => {
         const dataItem = await Batch.find({ batchYear: batchYear, dept: department }).select({ students: 1, _id: 0 })
         if(dataItem.length == 0){
             res.status(200).json({
-                message: "No students are there"
+                students:[]
             })
         }
         else{
             res.status(200).json({
-                student: dataItem
+                students : dataItem[0].students
             })
         }
 
@@ -447,7 +447,26 @@ router.get('/courses/:facultyId', async (req, res) => {
     }
 })
 
+// To get result for particular student..
+router.get('/result/:RollNo', async (req,res)=>{
+    try {
+        const dataItem = await Student.find({ RollNo: req.params.RollNo}).select({result:1,_id:0})
+        if(dataItem.length == 0){
+            res.status(200).json({
+                message: "No students are there"
+            })
+        }
+        else{
+            res.status(200).json({
+                student: dataItem
+            })
+        }
 
+    }
+    catch (error) {
+        return res.send(error)
+    }
+})
 
 
 
