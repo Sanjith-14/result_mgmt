@@ -185,16 +185,20 @@ router.get('/faculties', async (req, res) => {
 
 
 // Get all Faculties is..
-router.get('/faculties-id', async (req, res) => {
+router.get('/faculties-id-name', async (req, res) => {
     try {
         const facultyIds = [];
-        const dataItem = await Faculty.find({}).select({ facultyId: 1, _id: 0 })
+        const facultyName = []
+        const dataItem = await Faculty.find({}).select({ facultyId: 1, name:1, _id: 0 })
         dataItem.forEach((val) => {
             facultyIds.push(val.facultyId)
+            facultyName.push(val.name)
         })
-        // console.log(facultyIds)
+        console.log(facultyIds)
+        console.log(facultyName);
         res.status(200).json({
-            faculty: facultyIds
+            facultyId: facultyIds,
+            facultyName:facultyName
         })
     }
     catch (error) {
