@@ -105,6 +105,10 @@ const studentSchema = new mongoose.Schema(
             type:String,
             required:true
         },
+        country :{
+            type:String,
+            required:true
+        },
         parentName :{
             type:String,
             required:true

@@ -205,13 +205,13 @@ router.get('/faculties-id', async (req, res) => {
 
 // Post request for add faculty
 router.post('/add-faculty', async (req, res) => {
-    const { facultyId, name, DOB, DOJ, department, email, addressLine1, addressLine2, city, state, phoneNum } = req.body;
+    const { facultyId, name, DOB, DOJ, department, email, addressLine1, addressLine2, city, state, country ,phoneNum } = req.body;
     //save in db
-    const faculty = new Faculty({ facultyId: facultyId, name: name, DOB: DOB, DOJ: DOJ, department: department, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, phoneNum: phoneNum })
+    const faculty = new Faculty({ facultyId: facultyId, name: name, DOB: DOB, DOJ: DOJ, department: department, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state,country:country,phoneNum: phoneNum })
     await faculty.save()
     // if status is 200 , just send that..
     return res.status(200).json({
-        faculty: { facultyId, name, DOB, DOJ, department, email, addressLine1, addressLine2, city, state, phoneNum },
+        faculty: { facultyId, name, DOB, DOJ, department, email, addressLine1, addressLine2, city, state,country, phoneNum },
         success: "Faculty added sucessfully"
     })
 });
@@ -231,6 +231,7 @@ router.put('/update-faculty', async (req, res) => {
         addressLine2: req.body.addressLine2,
         city: req.body.city,
         state: req.body.state,
+        country: req.body.country,
         phoneNum: req.body.phoneNum
     }
     const dataItem = await Faculty.updateOne(filter, updatedData).then((data) => {
