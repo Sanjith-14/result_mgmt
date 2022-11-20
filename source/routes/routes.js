@@ -53,7 +53,7 @@ router.get('/student-detail/:rollNo', async (req, res) => {
     try {
         var rollNo = req.params.rollNo;
 
-        const dataItem = await Student.find({ rollNo: rollNo })
+        const dataItem = await Student.find({ rollNo: rollNo }).select({result:0})
         // console.log(dataItem)
         if (dataItem.length == 0) {
             res.json({
@@ -170,7 +170,7 @@ router.delete('/delete-student', async (req, res) => {
 
 
 // Get all Faculties..
-router.get('/faculties', async (req, res) => {
+router.get('/faculties',  async (req, res) => {
     try {
         const dataItem = await Faculty.find({})
         res.status(200).json({
@@ -185,20 +185,24 @@ router.get('/faculties', async (req, res) => {
 
 
 // Get all Faculties is..
-router.get('/faculties-id-name', async (req, res) => {
+router.get('/faculties-details', async (req, res) => {
     try {
         const facultyIds = [];
         const facultyName = []
-        const dataItem = await Faculty.find({}).select({ facultyId: 1, name:1, _id: 0 })
+        const dept =[]
+        const dataItem = await Faculty.find({}).select({ facultyId: 1, name:1,department:1, _id: 0 })
         dataItem.forEach((val) => {
             facultyIds.push(val.facultyId)
             facultyName.push(val.name)
+            dept.push(val.department)
         })
         console.log(facultyIds)
         console.log(facultyName);
+        console.log(dept);
         res.status(200).json({
             facultyId: facultyIds,
-            facultyName:facultyName
+            facultyName:facultyName,
+            department:dept
         })
     }
     catch (error) {
@@ -463,7 +467,7 @@ router.get('/result/:RollNo', async (req,res)=>{
         }
         else{
             res.status(200).json({
-                student: dataItem
+                result: dataItem[0].result
             })
         }
 
