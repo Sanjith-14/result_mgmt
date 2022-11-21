@@ -2,7 +2,6 @@ const mongoose = require('mongoose')
 
 
 
-
 //  Result Schema starts..
 const subjectSchema = new mongoose.Schema({
     cat1:{
@@ -50,9 +49,6 @@ const semesterSchema = new mongoose.Schema({
 })
 
 // Result Schema ends..
-
-
-
 
 
 
@@ -136,7 +132,7 @@ const studentSchema = new mongoose.Schema(
 const Student = mongoose.model('Student', studentSchema);
 
 
-
+// Faculty Schema
 const facultySchema = new mongoose.Schema(
     {
         facultyId :{
@@ -197,6 +193,57 @@ const facultySchema = new mongoose.Schema(
 
 const Faculty = mongoose.model('Faculty', facultySchema);
 
+
+//Admin Schema
+const adminSchema = new mongoose.Schema(
+    {
+        adminId :{
+            type:String,
+            required:true
+        },
+        name :{
+            type:String,
+            required:true
+        },
+        DOB:{
+            type:Date,
+            required:true
+        },
+        email :{
+            type:String,
+            required:true
+        },
+        addressLine1 :{
+            type:String,
+            required:true
+        },
+        addressLine2 :{
+            type:String,
+            required:true
+        },
+        city :{
+            type:String,
+            required:true
+        },
+        state :{
+            type:String,
+            required:true
+        },
+        country :{
+            type:String,
+            required:true
+        },
+        phoneNum :{
+            type:String,
+            required:true,
+            maxLength :12,
+            minLenngth:9
+        },
+
+    }
+)
+
+const Admin = mongoose.model('Admin',adminSchema)
 
 
 const CourseSchema = new mongoose.Schema({
@@ -307,4 +354,23 @@ const enrollSchema = new mongoose.Schema({
 
 const Enrollment = mongoose.model('Enroll',enrollSchema)
 
-module.exports = {Student,Faculty,Course,Batch,Enrollment}
+
+const credentialSchema = new mongoose.Schema({
+    email:{
+        type:String,
+        required:true
+    },
+    password:{
+        type:String,
+        required:true
+    },
+    role:{
+        type:String,
+        required:true,
+        enum: ['admin','faculty', 'student']
+    }
+})
+
+const Credential = mongoose.model('Credential',credentialSchema)
+
+module.exports = {Student,Faculty,Course,Batch,Enrollment,Credential,Admin}

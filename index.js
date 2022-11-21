@@ -17,7 +17,7 @@ mongoose.connect(process.env.MONGODB_URL , ()=>{
 });
 
 app.use("/",router)
-
+// app.use(verifyToken)
 app.listen((process.env.PORT || 8080),()=>{
     console.log("Server is running..")
 })
