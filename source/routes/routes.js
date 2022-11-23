@@ -745,7 +745,7 @@ router.get('/login-user', async (req, res) => {
 
 
 // for login with microsoft
-router.get('/login-user-ms', async (req, res) => {
+router.get('/social-login', async (req, res) => {
     try {
         const email = req.body.email;
         const dataItem = await Credential.find({ email: email }).select({ password: 0, _id: 0 })
