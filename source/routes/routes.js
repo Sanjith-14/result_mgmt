@@ -18,12 +18,14 @@ const Credential = item.Credential
 const Admin = item.Admin
 
 //Getting ready(Home page)..
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', async (req, res) => {
     try {
+
         res.status(200).json({
             message: "Welcome to Result Mannagement system",
             // details: req.user //maybe the user details from middleware
         })
+
     }
     catch (error) {
         res.send(error)
@@ -37,18 +39,22 @@ router.get('/', verifyToken, async (req, res) => {
 router.post('/add-admin', verifyToken, async (req, res) => {
     try {
         if (req.user.role == 'admin') {
-            const { adminId, name, DOB , email, addressLine1, addressLine2, city, state, country, phoneNum } = req.body;
+            const { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum } = req.body;
             //save in db
             const admin = new Admin({ adminId: adminId, name: name, DOB: DOB, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum })
             await admin.save()
+
+            const credentail = new Credential({ email: email, password: adminId, role: "admin" })
+            await credentail.save()
+
             // if status is 200 , just send that..
             return res.status(200).json({
-                admin: { adminId, name, DOB , email, addressLine1, addressLine2, city, state, country, phoneNum  },
+                admin: { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum },
                 success: "Admin added sucessfully"
             })
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
     } catch (error) {
         res.send(error)
@@ -78,7 +84,7 @@ router.get('/students', verifyToken, async (req, res) => {
             }
         }
         else {
-            res.json({ message: "Unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
 
     }
@@ -108,7 +114,7 @@ router.get('/student-detail/:rollNo', verifyToken, async (req, res) => {
             }
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
 
     }
@@ -144,13 +150,18 @@ router.post('/add-student', verifyToken, async (req, res) => {
                 )
             }
 
+
+            const credentail = new Credential({ email: email, password: rollNo, role: "student" })
+            await credentail.save()
+            // if status is 200 , just send that..
+
             return res.status(200).json({
                 student: { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, country, parentName, phoneNum },
                 success: "Student added sucessfully"
             })
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
     } catch (error) {
         res.send(error)
@@ -195,7 +206,7 @@ router.put('/update-student', verifyToken, async (req, res) => {
         })
     }
     else {
-        res.json({ message: "unauthorised" })
+        res.status(401).json({ message: "unauthorised" })
     }
 })
 
@@ -223,7 +234,7 @@ router.delete('/delete-student', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
     } catch (error) {
         res.send(error)
@@ -242,7 +253,7 @@ router.get('/faculties', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
 
     }
@@ -276,7 +287,7 @@ router.get('/faculties-details', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
     }
     catch (error) {
@@ -293,6 +304,12 @@ router.post('/add-faculty', verifyToken, async (req, res) => {
             //save in db
             const faculty = new Faculty({ facultyId: facultyId, name: name, DOB: DOB, DOJ: DOJ, department: department, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum })
             await faculty.save()
+
+
+            const credentail = new Credential({ email: email, password: facultyId, role: "faculty" })
+            await credentail.save()
+
+
             // if status is 200 , just send that..
             return res.status(200).json({
                 faculty: { facultyId, name, DOB, DOJ, department, email, addressLine1, addressLine2, city, state, country, phoneNum },
@@ -300,7 +317,7 @@ router.post('/add-faculty', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
     } catch (error) {
         res.send(error)
@@ -336,7 +353,7 @@ router.put('/update-faculty', verifyToken, async (req, res) => {
         })
     }
     else {
-        res.json({ message: "unauthorised" })
+        res.status(401).json({ message: "unauthorised" })
     }
 })
 
@@ -355,7 +372,7 @@ router.delete('/delete-faculty', verifyToken, async (req, res) => {
         })
     }
     else {
-        res.json({ message: "unauthorised" })
+        res.status(401).json({ message: "unauthorised" })
     }
 })
 
@@ -391,7 +408,7 @@ router.get('/courses/sem:semNo', verifyToken, async (req, res) => {
             }
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
     }
     catch (error) {
@@ -412,7 +429,7 @@ router.post('/add-course', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
     } catch (error) {
         res.send(error)
@@ -434,7 +451,7 @@ router.delete('/delete-course', verifyToken, async (req, res) => {
         })
     }
     else {
-        res.json({ message: "unauthorised" })
+        res.status(401).json({ message: "unauthorised" })
     }
 })
 
@@ -461,7 +478,7 @@ router.put('/update-course', verifyToken, async (req, res) => {
         })
     }
     else {
-        res.json({ message: "unauthorised" })
+        res.status(401).json({ message: "unauthorised" })
     }
 })
 
@@ -476,7 +493,7 @@ router.get('/batches', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
     }
     catch (error) {
@@ -508,7 +525,8 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
             for (let i = 0; i < courseId.length; i++) {
                 const res1 = await Student.updateMany(
                     { batchYear: batchYear, department: department },
-                    { $push: { "result.$[resElement].subjectMarks": { courseId: courseId[i], marks: { "cat1": 0, "cat2": 0, "sem": 0, "lab": 0 } } } },
+                    // Added grade..
+                    { $push: { "result.$[resElement].subjectMarks": { courseId: courseId[i], marks: { "cat1": 0, "cat2": 0, "sem": 0, "lab": 0, "grade": '' } } } },
                     { arrayFilters: [{ "resElement.semNo": currentSem }] }
                 )
             }
@@ -519,7 +537,7 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
     } catch (error) {
         res.json({
@@ -541,21 +559,66 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
             const currentSem = req.body.currentSem
             const marks = req.body.marks  //array
             // ends
+            if (examType == "sem") {
+                
+                var grades = ['RA', 'RA', 'RA', 'RA', 'RA', 'B', 'B+', 'A', 'A+', 'O']
+                const setField = "result.$[resElement].subjectMarks.$[subElement].marks." + examType
+                const setGrade = "result.$[resElement].subjectMarks.$[subElement].marks.grade"
 
-            const setField = "result.$[resElement].subjectMarks.$[subElement].marks." + examType
-            for (let i = 0; i < studRollNo.length; i++) {
-                const response = await Student.updateOne(
-                    { rollNo: studRollNo[i] },
-                    { $set: { [setField]: marks[i] } },
-                    { arrayFilters: [{ "resElement.semNo": currentSem }, { "subElement.courseId": courseId }] }
-                )
+                for (let i = 0; i < studRollNo.length; i++) {
+                    const response = await Student.updateOne(
+                        { rollNo: studRollNo[i] },
+                        { $set: { [setField]: marks[i] } },
+                        { arrayFilters: [{ "resElement.semNo": currentSem }, { "subElement.courseId": courseId }] }
+                    )
+                    // Calculating grade for the student
+                    const student = await Student.find({ rollNo: studRollNo[i] }).select({ result: 1, _id: 0 })
+                    const data = student[0].result[currentSem-1].subjectMarks
+                    var index;
+                    for (let i = 0; i < data.length; i++) {
+                        if (data[i].courseId ==courseId) {
+                            index=i
+                            break;
+                        }
+                    }
+                    // console.log(index);
+                    const temp = student[0].result[currentSem-1].subjectMarks[index].marks
+                    // console.log(student[0].result[currentSem-1].subjectMarks[index].marks)
+                    const gradeInt = Math.ceil((temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + 20) / 10) - 1
+                    // console.log(temp.cat1 + "+" + temp.cat2  + "+" + temp.sem + "20")
+                    // console.log(Math.ceil((temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + 20) / 10));
+                    // console.log(grades[gradeInt])  //Gives A or O
+
+                    // Update grade for a student
+                    const response1 = await Student.updateOne(
+                        { rollNo: studRollNo[i] },
+                        { $set: { [setGrade]: grades[gradeInt] } },
+                        { arrayFilters: [{ "resElement.semNo": currentSem }, { "subElement.courseId": courseId }] }
+                    )
+                
+                }
+
+                Enrollment.findOneAndUpdate({ courseId: courseId }, { $set: { isCompleted: true } }).then(() => {
+                    console.log("success")
+                })
+            }
+
+            else {
+                const setField = "result.$[resElement].subjectMarks.$[subElement].marks." + examType
+                for (let i = 0; i < studRollNo.length; i++) {
+                    const response = await Student.updateOne(
+                        { rollNo: studRollNo[i] },
+                        { $set: { [setField]: marks[i] } },
+                        { arrayFilters: [{ "resElement.semNo": currentSem }, { "subElement.courseId": courseId }] }
+                    )
+                }
             }
             res.json({
                 "message": "Result added successfully"
             })
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
     }
     catch (error) {
@@ -581,7 +644,7 @@ router.get('/courses/:facultyId', verifyToken, async (req, res) => {
             }
         }
         else {
-            res.json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorised" })
         }
     }
     catch (error) {
@@ -612,25 +675,25 @@ router.get('/result/:RollNo', verifyToken, async (req, res) => {
 
 
 //add credential..
-router.post('/add-credentail', verifyToken, async (req, res) => {
-    try {
-        if (req.user.role == "admin") {
-            const { email, password, role } = req.body;
-            //save in db
-            const credentail = new Credential({ email: email, password: password, role: role })
-            await credentail.save()
-            // if status is 200 , just send that..
-            return res.status(200).json({
-                credential: { email, password, role }
-            })
-        }
-        else {
-            res.json({ message: "unauthorised" })
-        }
-    } catch (error) {
-        res.send({ error })
-    }
-});
+// router.post('/add-credentail', verifyToken, async (req, res) => {
+//     try {
+//         if (req.user.role == "admin") {
+//             const { email, password, role } = req.body;
+//             //save in db
+//             const credentail = new Credential({ email: email, password: password, role: role })
+//             await credentail.save()
+//             // if status is 200 , just send that..
+//             return res.status(200).json({
+//                 credential: { email, password, role }
+//             })
+//         }
+//         else {
+//             res.status(401).json({ message: "unauthorised" })
+//         }
+//     } catch (error) {
+//         res.send({ error })
+//     }
+// });
 
 //for login with email and password..
 router.get('/login-user', async (req, res) => {
@@ -684,8 +747,8 @@ router.get('/login-user', async (req, res) => {
 // for login with microsoft
 router.get('/login-user-ms', async (req, res) => {
     try {
-        const email= req.body.email;
-        const dataItem = await Credential.find({email: email}).select({ password: 0, _id: 0 })
+        const email = req.body.email;
+        const dataItem = await Credential.find({ email: email }).select({ password: 0, _id: 0 })
         console.log(dataItem)
         if (dataItem.length == 0) {
             res.json({
@@ -695,7 +758,7 @@ router.get('/login-user-ms', async (req, res) => {
         else {
             try {
                 const role = dataItem[0].role
-                console.log(role+" "+email);
+                console.log(role + " " + email);
                 const token = jwt.sign({ email: email, role: role }, process.env.TOKEN_SECRET.toString(), { expiresIn: '86400s' });
                 // console.log(token);
                 console.log(dataItem);
@@ -726,6 +789,25 @@ router.get('/login-user-ms', async (req, res) => {
     }
     catch (error) {
         return res.send(error)
+    }
+})
+
+// Promoting the batch
+router.put('/promote-batch', verifyToken, async (req, res) => {
+    try {
+        if (req.user.role == "admin") {
+            const batch = await Batch.find({ batchYear: req.body.batchYear, dept: req.body.dept })
+            var semNo = parseInt(batch[0].currentSem) + 1
+            const batchUpdate = await Batch.updateOne({ batchYear: req.body.batchYear, dept: req.body.dept }, { $set: { currentSem: semNo, currentCourses: [] } })
+            res.status(200).json({
+                message: "Batch promoted successfully"
+            })
+        }
+        else {
+            res.status(401).json({ message: "unauthorised" })
+        }
+    } catch (error) {
+        res.send(error)
     }
 })
 

@@ -17,7 +17,7 @@ function verifyToken(req, res, next) {
     }
     catch(error){
         console.log(error) 
-        return res.sendStatus(403)
+        return res.sendStatus(401)  //403..
     }
     
     // const decoded = jwt.verify(token, process.env.TOKEN_SECRET.toString(), (err, email,user) => {
