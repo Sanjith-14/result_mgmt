@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
     try {
 
         res.status(200).json({
-            message: "Welcome to Result Mannagement system",
+            message: "Welcome to Result Management system",
             // details: req.user //maybe the user details from middleware
         })
 
@@ -33,6 +33,56 @@ router.get('/', async (req, res) => {
 })
 
 
+// Change password..
+router.get('/check-password', verifyToken, async (req, res) => {
+    try {
+        const email = req.email
+        const password = req.password
+        const credential = await Credential.find({ email: email, password: password })
+        if (credential.length == 0) {
+            res.status(200).json({ message: "Invalid password" })
+        }
+        else {
+            res.status(200).json({ message: "Correct password" })
+        }
+    } catch (error) {
+        res.send(error)
+    }
+})
+
+// Change password
+router.put('/change-password', verifyToken, async (req, res) => {
+    try {
+        const email = req.email
+        const details = Credential.find({ email: email })
+        const password = details.password
+        console.log(password)
+        const updatedpassword = req.password
+        if (password == updatedpassword) {
+            res.status(200).json({ message: "Old & new password are same" })
+        }
+        else {
+            const credential = Credential.findOneAndUpdate({ email: email }, { password: updatedpassword })
+            res.status(200).json({ message: "Password changed successfully" })
+        }
+    } catch (error) {
+        res.send(error)
+    }
+
+})
+
+// Forgot password
+router.put('/forget-password', async (req, res) => {
+    try {
+        const email = req.email
+        const updatedpassword = req.password
+        const credential = Credential.findOneAndUpdate({ email: email }, { password: updatedpassword })
+        res.status(200).json({ message: "Password changed successfully" })
+    } catch (error) {
+        res.send(error)
+    }
+
+})
 
 
 // Post request for add admin
@@ -560,7 +610,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
             const marks = req.body.marks  //array
             // ends
             if (examType == "sem") {
-                
+
                 var grades = ['RA', 'RA', 'RA', 'RA', 'RA', 'B', 'B+', 'A', 'A+', 'O']
                 const setField = "result.$[resElement].subjectMarks.$[subElement].marks." + examType
                 const setGrade = "result.$[resElement].subjectMarks.$[subElement].marks.grade"
@@ -573,16 +623,16 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                     )
                     // Calculating grade for the student
                     const student = await Student.find({ rollNo: studRollNo[i] }).select({ result: 1, _id: 0 })
-                    const data = student[0].result[currentSem-1].subjectMarks
+                    const data = student[0].result[currentSem - 1].subjectMarks
                     var index;
                     for (let i = 0; i < data.length; i++) {
-                        if (data[i].courseId ==courseId) {
-                            index=i
+                        if (data[i].courseId == courseId) {
+                            index = i
                             break;
                         }
                     }
                     // console.log(index);
-                    const temp = student[0].result[currentSem-1].subjectMarks[index].marks
+                    const temp = student[0].result[currentSem - 1].subjectMarks[index].marks
                     // console.log(student[0].result[currentSem-1].subjectMarks[index].marks)
                     const gradeInt = Math.ceil((temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + 20) / 10) - 1
                     // console.log(temp.cat1 + "+" + temp.cat2  + "+" + temp.sem + "20")
@@ -595,7 +645,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                         { $set: { [setGrade]: grades[gradeInt] } },
                         { arrayFilters: [{ "resElement.semNo": currentSem }, { "subElement.courseId": courseId }] }
                     )
-                
+
                 }
 
                 Enrollment.findOneAndUpdate({ courseId: courseId }, { $set: { isCompleted: true } }).then(() => {
@@ -728,7 +778,7 @@ router.get('/login-user', async (req, res) => {
                     res.status(200).json({ accessToken: token, facultyId: faculty[0].facultyId });
                 }
                 else {
-                    res.json({ message: "Invalid role.." })
+                    res.status(401).json({ message: "Invalid user.." })
                 }
             }
             catch (error) {
