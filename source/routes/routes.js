@@ -20,7 +20,6 @@ const Admin = item.Admin
 //Getting ready(Home page)..
 router.get('/', async (req, res) => {
     try {
-
         res.status(200).json({
             message: "Welcome to Result Management system",
             // details: req.user //maybe the user details from middleware
@@ -34,11 +33,12 @@ router.get('/', async (req, res) => {
 
 
 // Change password..
-router.get('/check-password', verifyToken, async (req, res) => {
+router.get('/check-password', verifyToken , async (req, res) => {
     try {
-        const email = req.email
-        const password = req.password
-        const credential = await Credential.find({ email: email, password: password })
+        const email = req.body.email
+        const password = req.body.password
+        const credential = await Credential.find({ email: email, password: password }).select({email:1,password:1})
+        console.log(credential)
         if (credential.length == 0) {
             res.status(200).json({ message: "Invalid password" })
         }
@@ -53,11 +53,11 @@ router.get('/check-password', verifyToken, async (req, res) => {
 // Change password
 router.put('/change-password', verifyToken, async (req, res) => {
     try {
-        const email = req.email
-        const details = Credential.find({ email: email })
-        const password = details.password
+        const email = req.body.email
+        const details = await Credential.find({ email: email })
+        const password = details[0].password
         console.log(password)
-        const updatedpassword = req.password
+        const updatedpassword = req.body.password
         if (password == updatedpassword) {
             res.status(200).json({ message: "Old & new password are same" })
         }
@@ -74,9 +74,9 @@ router.put('/change-password', verifyToken, async (req, res) => {
 // Forgot password
 router.put('/forget-password', async (req, res) => {
     try {
-        const email = req.email
-        const updatedpassword = req.password
-        const credential = Credential.findOneAndUpdate({ email: email }, { password: updatedpassword })
+        const email = req.body.email
+        const updatedpassword = req.body.password
+        const credential = await Credential.findOneAndUpdate({ email: email }, { password: updatedpassword })
         res.status(200).json({ message: "Password changed successfully" })
     } catch (error) {
         res.send(error)
@@ -84,6 +84,8 @@ router.put('/forget-password', async (req, res) => {
 
 })
 
+
+// Check email..
 
 // Post request for add admin
 router.post('/add-admin', verifyToken, async (req, res) => {
@@ -558,7 +560,7 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
             const department = req.body.department
             const batchYear = req.body.batchYear
             const courseId = req.body.courseId //array
-            const courseName = req.body.courseName
+            const courseName = req.body.courseName //array
             const faculties = req.body.faculties //array
             const currentSem = req.body.currentSem
             for (let i = 0; i < courseId.length; i++) {
