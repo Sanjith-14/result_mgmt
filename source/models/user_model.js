@@ -19,6 +19,9 @@ const subjectSchema = new mongoose.Schema({
     lab:{
         type:Number
     },
+    assignment:{
+        type:Number
+    },
     grade:{
         type:String,
         // required:true

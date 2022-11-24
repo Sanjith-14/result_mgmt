@@ -38,7 +38,7 @@ router.get('/check-password', verifyToken, async (req, res) => {
         const email = req.body.email
         const password = req.body.password
         const credential = await Credential.find({ email: email, password: password }).select({ email: 1, password: 1 })
-        console.log(credential)
+        // console.log(credential)
         if (credential.length == 0) {
             res.status(200).json({ message: "Invalid password" })
         }
@@ -56,7 +56,7 @@ router.put('/change-password', verifyToken, async (req, res) => {
         const email = req.body.email
         const details = await Credential.find({ email: email })
         const password = details[0].password
-        console.log(password)
+        // console.log(password)
         const updatedpassword = req.body.password
         if (password == updatedpassword) {
             res.status(200).json({ message: "Old & new password are same" })
@@ -387,7 +387,6 @@ router.post('/add-faculty', verifyToken, async (req, res) => {
             })
 
             if (flag == 0) {
-                console.log("flag 0")
                 const faculty = new Faculty({ facultyId: facultyId, name: name, DOB: DOB, DOJ: DOJ, department: department, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum })
                 await faculty.save()
 
@@ -626,7 +625,7 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
                 const res1 = await Student.updateMany(
                     { batchYear: batchYear, department: department },
                     // Added grade..
-                    { $push: { "result.$[resElement].subjectMarks": { courseId: courseId[i], marks: { "cat1": 0, "cat2": 0, "sem": 0, "lab": 0, "grade": '' } } } },
+                    { $push: { "result.$[resElement].subjectMarks": { courseId: courseId[i], marks: { "cat1": 0, "cat2": 0, "sem": 0, "lab": 0, "assignment": 0, "grade": '' } } } },
                     { arrayFilters: [{ "resElement.semNo": currentSem }] }
                 )
             }
@@ -812,7 +811,7 @@ router.get('/login-user', async (req, res) => {
                 // console.log(role+" "+email);
                 const token = jwt.sign({ email: email, role: role }, process.env.TOKEN_SECRET.toString(), { expiresIn: '86400s' });
                 // console.log(token);
-                console.log(dataItem);
+                // console.log(dataItem);
                 if (role == 'student') {
                     const student = await Student.find({ email: dataItem[0].email }).select({ rollNo: 1, _id: 0 })
                     res.status(200).json({ accessToken: token, rollNo: student[0].rollNo });
@@ -909,6 +908,68 @@ router.put('/promote-batch', verifyToken, async (req, res) => {
         res.send(error)
     }
 })
+
+
+// For dropdown..
+// add assignment..
+// {cat1:true,cat2:false}
+
+var dropDown = { "cat1": false, "cat2": false, "sem": false, "lab": false }
+var dropDownUpdated = dropDown;
+
+router.put('/edit-dropdown', verifyToken, (req, res) => {
+    if (req.user.role == 'admin') {
+        try {
+            var examType = req.body.examType
+            var updated = dropDown;
+            if (examType == 'cat1') {
+                updated.cat1 = true
+                updated.cat2 = false
+                updated.sem = false
+                updated.lab = false
+            }
+            else if (examType == 'cat2') {
+                updated.cat1 = false
+                updated.cat2 = true
+                updated.sem = false
+                updated.lab = false
+            }
+            else if (examType == 'sem') {
+                updated.cat1 = false
+                updated.cat2 = false
+                updated.sem = true
+                updated.lab = false
+            }
+            else if (examType == 'lab') {
+                updated.cat1 = false
+                updated.cat2 = false
+                updated.sem = false
+                updated.lab = true
+            }
+            dropDownUpdated = updated
+            return res.status(200).json({ dropDown: dropDownUpdated })
+        } catch (error) {
+            res.send(error)
+        }
+    }
+    else {
+        res.status(401).json({ message: "unauthorized" })
+    }
+})
+
+router.get('/get-dropdown', verifyToken, (req, res) => {
+    if (req.user.role == 'faculty') {
+        try {
+            res.json({ dropDown: dropDownUpdated })
+        } catch (error) {
+            res.send(error)
+        }
+    }
+    else {
+        res.status(401).json({ message: "unauthorized" })
+    }
+})
+
 
 
 module.exports = router;

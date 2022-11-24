@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 function verifyToken(req, res, next) {
-    // console.log("Vrified token")
+    // console.log("Verified token")
     // next()
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
@@ -11,7 +11,7 @@ function verifyToken(req, res, next) {
 
     try{
         const decoded = jwt.verify(token, process.env.TOKEN_SECRET.toString())
-        console.log(decoded);
+        // console.log(decoded);
         req.user = decoded;
         next()
     }
