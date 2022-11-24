@@ -33,11 +33,11 @@ router.get('/', async (req, res) => {
 
 
 // Change password..
-router.get('/check-password', verifyToken , async (req, res) => {
+router.get('/check-password', verifyToken, async (req, res) => {
     try {
         const email = req.body.email
         const password = req.body.password
-        const credential = await Credential.find({ email: email, password: password }).select({email:1,password:1})
+        const credential = await Credential.find({ email: email, password: password }).select({ email: 1, password: 1 })
         console.log(credential)
         if (credential.length == 0) {
             res.status(200).json({ message: "Invalid password" })
@@ -92,21 +92,32 @@ router.post('/add-admin', verifyToken, async (req, res) => {
     try {
         if (req.user.role == 'admin') {
             const { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum } = req.body;
-            //save in db
-            const admin = new Admin({ adminId: adminId, name: name, DOB: DOB, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum })
-            await admin.save()
 
-            const credentail = new Credential({ email: email, password: adminId, role: "admin" })
-            await credentail.save()
-
-            // if status is 200 , just send that..
-            return res.status(200).json({
-                admin: { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum },
-                success: "Admin added sucessfully"
+            let flag = 0
+            const existingAdmins = await Admin.find({}).select({ adminId: 1 })
+            existingAdmins.forEach((data) => {
+                if (data.adminId == adminId) {
+                    flag = 1;
+                    return res.json({ message: "Admin already exists" })
+                }
             })
+            //save in db
+            if (flag == 0) {
+                const admin = new Admin({ adminId: adminId, name: name, DOB: DOB, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum })
+                await admin.save()
+
+                const credentail = new Credential({ email: email, password: adminId, role: "admin" })
+                await credentail.save()
+
+                // if status is 200 , just send that..
+                return res.status(200).json({
+                    admin: { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum },
+                    success: "Admin added sucessfully"
+                })
+            }
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
     } catch (error) {
         res.send(error)
@@ -136,7 +147,7 @@ router.get('/students', verifyToken, async (req, res) => {
             }
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
 
     }
@@ -166,7 +177,7 @@ router.get('/student-detail/:rollNo', verifyToken, async (req, res) => {
             }
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
 
     }
@@ -180,40 +191,52 @@ router.get('/student-detail/:rollNo', verifyToken, async (req, res) => {
 router.post('/add-student', verifyToken, async (req, res) => {
     try {
         if (req.user.role == 'admin') {
-            var result = [{ "semNo": 1, "subjectMarks": [] }, { "semNo": 2, "subjectMarks": [] }, { "semNo": 3, "subjectMarks": [] }, { "semNo": 4, "subjectMarks": [] }, { "semNo": 5, "subjectMarks": [] }, { "semNo": 6, "subjectMarks": [] }, { "semNo": 7, "subjectMarks": [] }, { "semNo": 8, "subjectMarks": [] }]
             const { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, country, parentName, phoneNum, parentNum } = req.body;
-            //save in db
-            const student = new Student({ rollNo: rollNo, name: name, admissionNo: admissionNo, DOB: DOB, email: email, batchYear: batchYear, department: department, batchYear: batchYear, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, parentName: parentName, phoneNum: phoneNum, parentNum: parentNum, result: result })
-            await student.save()
-            // if status is 200 , just send that..
 
-
-            const batchItem = await Batch.find({ batchYear: batchYear, dept: department })
-            // console.log(batchItem)
-            // console.log(batchItem.length)
-            if (batchItem.length == 0) {
-                const batch = new Batch({ batchYear: batchYear, dept: department, currentSem: 1, students: [rollNo], courses: [] })
-                await batch.save()
-            }
-            else {
-                const batch = await Batch.updateOne(
-                    { dept: department, batchYear: batchYear },   //filter data
-                    { $push: { students: rollNo } },  //data to be inserted
-                )
-            }
-
-
-            const credentail = new Credential({ email: email, password: rollNo, role: "student" })
-            await credentail.save()
-            // if status is 200 , just send that..
-
-            return res.status(200).json({
-                student: { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, country, parentName, phoneNum },
-                success: "Student added sucessfully"
+            let flag = 0
+            const existingStudents = await Student.find({}).select({ rollNo: 1 })
+            existingStudents.forEach((data) => {
+                if (data.rollNo == rollNo) {
+                    flag = 1
+                    return res.json({ message: "Student already exists" })
+                }
             })
+
+
+            if (flag == 0) {
+                var result = [{ "semNo": 1, "subjectMarks": [] }, { "semNo": 2, "subjectMarks": [] }, { "semNo": 3, "subjectMarks": [] }, { "semNo": 4, "subjectMarks": [] }, { "semNo": 5, "subjectMarks": [] }, { "semNo": 6, "subjectMarks": [] }, { "semNo": 7, "subjectMarks": [] }, { "semNo": 8, "subjectMarks": [] }]
+                const student = new Student({ rollNo: rollNo, name: name, admissionNo: admissionNo, DOB: DOB, email: email, batchYear: batchYear, department: department, batchYear: batchYear, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, parentName: parentName, phoneNum: phoneNum, parentNum: parentNum, result: result })
+                await student.save()
+                // if status is 200 , just send that..
+
+
+                const batchItem = await Batch.find({ batchYear: batchYear, dept: department })
+                // console.log(batchItem)
+                // console.log(batchItem.length)
+                if (batchItem.length == 0) {
+                    const batch = new Batch({ batchYear: batchYear, dept: department, currentSem: 1, students: [rollNo], courses: [] })
+                    await batch.save()
+                }
+                else {
+                    const batch = await Batch.updateOne(
+                        { dept: department, batchYear: batchYear },   //filter data
+                        { $push: { students: rollNo } },  //data to be inserted
+                    )
+                }
+
+
+                const credentail = new Credential({ email: email, password: rollNo, role: "student" })
+                await credentail.save()
+                // if status is 200 , just send that..
+
+                return res.status(200).json({
+                    student: { rollNo, name, admissionNo, DOB, department, email, batchYear, addressLine1, addressLine2, city, state, country, parentName, phoneNum },
+                    success: "Student added sucessfully"
+                })
+            }
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
     } catch (error) {
         res.send(error)
@@ -258,7 +281,7 @@ router.put('/update-student', verifyToken, async (req, res) => {
         })
     }
     else {
-        res.status(401).json({ message: "unauthorised" })
+        res.status(401).json({ message: "unauthorized" })
     }
 })
 
@@ -286,7 +309,7 @@ router.delete('/delete-student', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
     } catch (error) {
         res.send(error)
@@ -305,7 +328,7 @@ router.get('/faculties', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
 
     }
@@ -329,9 +352,9 @@ router.get('/faculties-details', verifyToken, async (req, res) => {
                 facultyName.push(val.name)
                 dept.push(val.department)
             })
-            console.log(facultyIds)
-            console.log(facultyName);
-            console.log(dept);
+            // console.log(facultyIds)
+            // console.log(facultyName);
+            // console.log(dept);
             res.status(200).json({
                 facultyId: facultyIds,
                 facultyName: facultyName,
@@ -339,7 +362,7 @@ router.get('/faculties-details', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
     }
     catch (error) {
@@ -354,22 +377,35 @@ router.post('/add-faculty', verifyToken, async (req, res) => {
         if (req.user.role == 'admin') {
             const { facultyId, name, DOB, DOJ, department, email, addressLine1, addressLine2, city, state, country, phoneNum } = req.body;
             //save in db
-            const faculty = new Faculty({ facultyId: facultyId, name: name, DOB: DOB, DOJ: DOJ, department: department, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum })
-            await faculty.save()
-
-
-            const credentail = new Credential({ email: email, password: facultyId, role: "faculty" })
-            await credentail.save()
-
-
-            // if status is 200 , just send that..
-            return res.status(200).json({
-                faculty: { facultyId, name, DOB, DOJ, department, email, addressLine1, addressLine2, city, state, country, phoneNum },
-                success: "Faculty added sucessfully"
+            let flag = 0;
+            const existingFaculty = await Faculty.find({}).select({ facultyId: 1 })
+            existingFaculty.forEach((data) => {
+                if (data.facultyId == facultyId) {
+                    flag = 1;
+                    return res.json({ message: "Faculty already exists" })
+                }
             })
+
+            if (flag == 0) {
+                console.log("flag 0")
+                const faculty = new Faculty({ facultyId: facultyId, name: name, DOB: DOB, DOJ: DOJ, department: department, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum })
+                await faculty.save()
+
+
+                const credentail = new Credential({ email: email, password: facultyId, role: "faculty" })
+                await credentail.save()
+
+
+                // if status is 200 , just send that..
+                return res.status(200).json({
+                    faculty: { facultyId, name, DOB, DOJ, department, email, addressLine1, addressLine2, city, state, country, phoneNum },
+                    success: "Faculty added sucessfully"
+                })
+            }
+
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
     } catch (error) {
         res.send(error)
@@ -405,7 +441,7 @@ router.put('/update-faculty', verifyToken, async (req, res) => {
         })
     }
     else {
-        res.status(401).json({ message: "unauthorised" })
+        res.status(401).json({ message: "unauthorized" })
     }
 })
 
@@ -424,7 +460,7 @@ router.delete('/delete-faculty', verifyToken, async (req, res) => {
         })
     }
     else {
-        res.status(401).json({ message: "unauthorised" })
+        res.status(401).json({ message: "unauthorized" })
     }
 })
 
@@ -460,7 +496,7 @@ router.get('/courses/sem:semNo', verifyToken, async (req, res) => {
             }
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
     }
     catch (error) {
@@ -473,18 +509,30 @@ router.post('/add-course', verifyToken, async (req, res) => {
     try {
         if (req.user.role == 'admin') {
             const { _id, name, semNo, offeredBy, type, hours, credits, facultyId } = req.body;
-            const course = new Course({ _id: _id, name: name, semNo: semNo, offeredBy: offeredBy, type: type, hours: hours, credits: credits, facultyId: facultyId })
-            await course.save()  //save in db
-            return res.status(200).json({
-                course: { _id, name, semNo, offeredBy, type, hours, credits, facultyId },
-                success: "Course added sucessfully"
+
+            let flag = 0;
+            const existingCourse = await Course.find({}).select({ _id: 1 })
+            existingCourse.forEach((data) => {
+                if (data._id == _id) {
+                    flag = 1;
+                    return res.json({ message: "Course already exists" })
+                }
             })
+
+            if (flag == 0) {
+                const course = new Course({ _id: _id, name: name, semNo: semNo, offeredBy: offeredBy, type: type, hours: hours, credits: credits, facultyId: facultyId })
+                await course.save()  //save in db
+                return res.status(200).json({
+                    course: { _id, name, semNo, offeredBy, type, hours, credits, facultyId },
+                    success: "Course added sucessfully"
+                })
+            }
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            return res.status(401).json({ message: "unauthorized" })
         }
     } catch (error) {
-        res.send(error)
+        return res.send(error)
     }
 });
 
@@ -503,7 +551,7 @@ router.delete('/delete-course', verifyToken, async (req, res) => {
         })
     }
     else {
-        res.status(401).json({ message: "unauthorised" })
+        res.status(401).json({ message: "unauthorized" })
     }
 })
 
@@ -530,7 +578,7 @@ router.put('/update-course', verifyToken, async (req, res) => {
         })
     }
     else {
-        res.status(401).json({ message: "unauthorised" })
+        res.status(401).json({ message: "unauthorized" })
     }
 })
 
@@ -545,7 +593,7 @@ router.get('/batches', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
     }
     catch (error) {
@@ -589,7 +637,7 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
     } catch (error) {
         res.json({
@@ -670,7 +718,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
     }
     catch (error) {
@@ -696,7 +744,7 @@ router.get('/courses/:facultyId', verifyToken, async (req, res) => {
             }
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
     }
     catch (error) {
@@ -740,7 +788,7 @@ router.get('/result/:RollNo', verifyToken, async (req, res) => {
 //             })
 //         }
 //         else {
-//             res.status(401).json({ message: "unauthorised" })
+//             res.status(401).json({ message: "unauthorized" })
 //         }
 //     } catch (error) {
 //         res.send({ error })
@@ -752,7 +800,7 @@ router.get('/login-user', async (req, res) => {
     try {
         const { email, password } = req.body;
         const dataItem = await Credential.find({ email: email, password: password }).select({ password: 0, _id: 0 })
-        console.log(dataItem)
+        // console.log(dataItem)
         if (dataItem.length == 0) {
             res.json({
                 message: "Invalid Credentials"
@@ -770,7 +818,6 @@ router.get('/login-user', async (req, res) => {
                     res.status(200).json({ accessToken: token, rollNo: student[0].rollNo });
                 }
                 else if (role == 'admin') {
-                    console.log("admin");
                     const admin = await Admin.find({ email: dataItem[0].email }).select({ adminId: 1, _id: 0 })
                     res.status(200).json({ accessToken: token, adminId: admin[0].adminId });
                 }
@@ -801,7 +848,7 @@ router.get('/social-login', async (req, res) => {
     try {
         const email = req.body.email;
         const dataItem = await Credential.find({ email: email }).select({ password: 0, _id: 0 })
-        console.log(dataItem)
+        // console.log(dataItem)
         if (dataItem.length == 0) {
             res.json({
                 message: "Invalid Credentials"
@@ -810,16 +857,16 @@ router.get('/social-login', async (req, res) => {
         else {
             try {
                 const role = dataItem[0].role
-                console.log(role + " " + email);
+                // console.log(role + " " + email);
                 const token = jwt.sign({ email: email, role: role }, process.env.TOKEN_SECRET.toString(), { expiresIn: '86400s' });
                 // console.log(token);
-                console.log(dataItem);
+                // console.log(dataItem);
                 if (role == 'student') {
                     const student = await Student.find({ email: dataItem[0].email }).select({ rollNo: 1, _id: 0 })
                     res.status(200).json({ accessToken: token, rollNo: student[0].rollNo });
                 }
                 else if (role == 'admin') {
-                    console.log("admin");
+                    // console.log("admin");
                     const admin = await Admin.find({ email: dataItem[0].email }).select({ adminId: 1, _id: 0 })
                     res.status(200).json({ accessToken: token, adminId: admin[0].adminId });
                 }
@@ -856,7 +903,7 @@ router.put('/promote-batch', verifyToken, async (req, res) => {
             })
         }
         else {
-            res.status(401).json({ message: "unauthorised" })
+            res.status(401).json({ message: "unauthorized" })
         }
     } catch (error) {
         res.send(error)
