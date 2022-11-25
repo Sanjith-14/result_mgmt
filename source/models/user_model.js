@@ -395,4 +395,15 @@ const credentialSchema = new mongoose.Schema({
 
 const Credential = mongoose.model('Credential', credentialSchema)
 
-module.exports = { Student, Faculty, Course, Batch, Enrollment, Credential, Admin }
+
+const checkSchema = new mongoose.Schema({
+    id:{
+        type:String,
+        required:true
+    }
+})
+
+const Check = mongoose.model('Check',checkSchema)
+
+
+module.exports = { Student, Faculty, Course, Batch, Enrollment, Credential, Admin,Check }

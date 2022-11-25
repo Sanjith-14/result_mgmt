@@ -5,11 +5,23 @@ const jwt = require("jsonwebtoken");
 const dotenv = require('dotenv')
 dotenv.config()
 
+// const busboyBodyParser = require('busboy-body-parser');
+// router.use(busboyBodyParser());
+// var expressBusboy = require('express-busboy');
+// expressBusboy.extend(router)
+// const bodyParser = require('body-parser');
+// router.use(bodyParser.json())
+// router.use(bodyParser.urlencoded({ extended: true }));
+
+router.use(express.json());
+router.use(express.urlencoded({ extended: true }));
+
 const verifyToken = require("../../middleware/verifyToken");
 
 
 const multer = require('multer');
 
+// middlewar
 var storage = multer.diskStorage({
     destination: "uploads",
     filename: function (req, file, cb) {
@@ -20,7 +32,7 @@ var storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage }).single("Image");
+const upload = multer({ storage: storage }).single("image")
 
 
 
@@ -101,59 +113,64 @@ router.put('/forget-password', async (req, res) => {
 })
 
 
-// Check email..
+
 
 // Post request for add admin
 router.post('/add-admin', verifyToken, async (req, res) => {
     try {
         if (req.user.role == 'admin') {
-            const { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum } = req.body;
+            await item.Check.deleteMany({});
 
-            let flag = 0
-            const existingAdmins = await Admin.find({}).select({ adminId: 1 })
-            existingAdmins.forEach((data) => {
-                if (data.adminId == adminId) {
-                    flag = 1;
-                    return res.json({ message: "Admin already exists" })
+            // Upload image through form-data
+            upload(req, res, async (err) => {
+                if (err) {
+                    console.log(err)
                 }
-            })
-            //save in db
-            if (flag == 0) {
-                // const admin = new Admin({ adminId: adminId, name: name, DOB: DOB, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum })
-                // await admin.save()
+                else {
+                    const temp = new item.Check({ id: req.body.adminId })
+                    await temp.save()
+                    const det = await item.Check.find({})
+                    let flag = 0;
+                    const existingAdmins = await Admin.find({}).select({ adminId: 1 })
+                    console.log(existingAdmins)
+                    existingAdmins.forEach((data) => {
+                        if (data.adminId == det[0].id) {
+                            console.log(det[0].id)
+                            flag = 1
+                            return res.json({ message: "Admin already exists" })
+                        }
+                    })
 
 
-                upload(req, res, (err) => {
-                    if (err) {
-                        console.log(err)
-                    }
-                    else {
+                    if (flag == 0) {
                         const admin = new Admin({
-                            adminId: adminId, name: name, DOB: DOB, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum,
+                            adminId: req.body.adminId, name: req.body.name, DOB: req.body.DOB, email: req.body.email, addressLine1: req.body.addressLine1, addressLine2: req.body.addressLine2, city: req.body.city, state: req.body.state, country: req.body.country, phoneNum: req.body.phoneNum,
                             image: {
                                 data: req.file.filename,
                                 contentType: 'image/png'
                             }
                         })
-                        admin.save().then((_) => {
+                        await admin.save().then((_) => {
                             console.log("Image uploaded...")
-                            return res.json({ message: "Successfully uploaded",success:"Admin added successfully" })
+                            // return res.json({ message: "Successfully uploaded",success:"Admin added successfully" })
                         }).catch((error) => {
-                            console.log(error)
+                            return res.send(error)
+                        })
+
+                        const credentail = new Credential({ email: req.body.email, password: det[0].id, role: "admin" })
+                        await credentail.save()
+
+                        return res.status(200).json({
+                            success: "Admin added sucessfully"
                         })
                     }
-                })
+
+                }
+            })
 
 
-                const credentail = new Credential({ email: email, password: adminId, role: "admin" })
-                await credentail.save()
 
-                // if status is 200 , just send that..
-                return res.status(200).json({
-                    admin: { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum },
-                    success: "Admin added sucessfully"
-                })
-            }
+
         }
         else {
             res.status(401).json({ message: "unauthorized" })
