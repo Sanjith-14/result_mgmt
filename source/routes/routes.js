@@ -8,6 +8,22 @@ dotenv.config()
 const verifyToken = require("../../middleware/verifyToken");
 
 
+const multer = require('multer');
+
+var storage = multer.diskStorage({
+    destination: "uploads",
+    filename: function (req, file, cb) {
+        const originalname = file.originalname;
+        // const extension = originalname.split('.')[-1]
+        // const newFileName = uuid.v1() + " "+extension
+        cb(null, originalname);
+    }
+});
+
+const upload = multer({ storage: storage }).single("Image");
+
+
+
 const item = require('../models/user_model')
 const Student = item.Student
 const Faculty = item.Faculty
@@ -103,8 +119,31 @@ router.post('/add-admin', verifyToken, async (req, res) => {
             })
             //save in db
             if (flag == 0) {
-                const admin = new Admin({ adminId: adminId, name: name, DOB: DOB, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum })
-                await admin.save()
+                // const admin = new Admin({ adminId: adminId, name: name, DOB: DOB, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum })
+                // await admin.save()
+
+
+                upload(req, res, (err) => {
+                    if (err) {
+                        console.log(err)
+                    }
+                    else {
+                        const admin = new Admin({
+                            adminId: adminId, name: name, DOB: DOB, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum,
+                            image: {
+                                data: req.file.filename,
+                                contentType: 'image/png'
+                            }
+                        })
+                        newImage.save().then((_) => {
+                            console.log("Image uploaded...")
+                            res.json({ message: "Successfully uploaded" })
+                        }).catch((error) => {
+                            console.log(error)
+                        })
+                    }
+                })
+
 
                 const credentail = new Credential({ email: email, password: adminId, role: "admin" })
                 await credentail.save()
@@ -130,7 +169,7 @@ router.post('/add-admin', verifyToken, async (req, res) => {
 // by department , batch
 router.get('/students', verifyToken, async (req, res) => {
     try {
-        if (req.user.role == 'admin') {
+        if (req.user.role == 'faculty') {
             var department = req.body.department
             var batchYear = req.body.batchYear //take from front-end
 
