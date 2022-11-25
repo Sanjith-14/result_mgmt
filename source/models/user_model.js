@@ -142,8 +142,7 @@ const studentSchema = new mongoose.Schema(
         },
         image: {
             data: Buffer,
-            contentType: String,
-            required: true
+            contentType: String
         }
     }
 )
@@ -260,8 +259,7 @@ const adminSchema = new mongoose.Schema(
         },
         image: {
             data: Buffer,
-            contentType: String,
-            required: true
+            contentType: String
         }
 
     }

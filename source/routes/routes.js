@@ -135,9 +135,9 @@ router.post('/add-admin', verifyToken, async (req, res) => {
                                 contentType: 'image/png'
                             }
                         })
-                        newImage.save().then((_) => {
+                        admin.save().then((_) => {
                             console.log("Image uploaded...")
-                            res.json({ message: "Successfully uploaded" })
+                            return res.json({ message: "Successfully uploaded",success:"Admin added successfully" })
                         }).catch((error) => {
                             console.log(error)
                         })
