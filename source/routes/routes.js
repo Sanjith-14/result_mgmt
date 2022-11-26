@@ -256,6 +256,7 @@ router.get('/get-mark',async (req,res)=>{
     const dept = req.body.dept
     const sem = req.body.sem
     const courseId = req.body.courseId
+    const examType = req.body.examType
 
     const data = await Batch.find({batchYear:batchYear,dept:dept}).select({students:1})
     data[0].students.forEach(async (studs)=>{
@@ -263,7 +264,7 @@ router.get('/get-mark',async (req,res)=>{
         // console.log(student[0].result[sem-1].subjectMarks)
         for(let i=0;i<student[0].result[sem-1].subjectMarks.length;i++){
             if(student[0].result[sem-1].subjectMarks[i].courseId == courseId){
-                console.log('lol')
+                console.log("Mark :" + student[0].result[sem-1].subjectMarks[i].marks.cat1)
             }
         }
     })
@@ -654,7 +655,7 @@ router.get('/courses/sem:semNo', verifyToken, async (req, res) => {
             const dataItem = await Course.find({ semNo: req.params.semNo })
             if (dataItem.length == 0) {
                 res.json({
-                    course: "Invalid sem"
+                    course: []
                 })
             }
             // console.log(dataItem.length())
@@ -787,7 +788,7 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
             const res1 = await Student.updateMany(
                 { batchYear: batchYear, department: department },
                 // Added grade..
-                { $set: { "result.$[resElement].subjectMarks": {} } },
+                { $set: { "result.$[resElement].subjectMarks": [] } },
                 { arrayFilters: [{ "resElement.semNo": currentSem }] }
             )
             
