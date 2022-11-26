@@ -328,7 +328,7 @@ router.get('/student-detail/:rollNo', verifyToken, async (req, res) => {
     try {
         if (req.user.role == "faculty" || req.user.role == "admin" || req.user.role == "student") {
             var rollNo = req.params.rollNo;
-            const dataItem = await Student.find({ rollNo: rollNo }).select({ result: 0 })
+            const dataItem = await Student.find({ rollNo: rollNo }).select({ result: 0 , CGPA:0,SGPA:0})
             // console.log(dataItem)
             if (dataItem.length == 0) {
                 res.json({
@@ -815,7 +815,7 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
             //     console.log("Deleted")
             // }
 
-            const del = await Enrollment.deleteMany({ batchYear: batchYear, department: department })
+            const del = await Enrollment.deleteMany({ batchYear: batchYear, department: department , semNo:currentSem })
             console.log("Deleted..")
 
 
@@ -867,6 +867,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
             let courseId = req.body.courseId
             const currentSem = req.body.currentSem
             const marks = req.body.marks  //array
+            const batchYear = req.body.batchYear
 
             // ends
             if (examType == "sem") {
@@ -935,7 +936,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
 
                     // upload cgpa to student
                     let post = 1
-                    const enroll = await Enrollment.find({ semNo: currentSem, department: studRollNo[i].substring(3, 5) })
+                    const enroll = await Enrollment.find({ semNo: currentSem, department: studRollNo[i].substring(3, 5) , batchYear:batchYear })
                     for (let k = 0; k < enroll.length; k++) {
                         if (enroll[k].isCompleted == false) {
                             post = 0;
@@ -953,8 +954,11 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                         }
                         var sgpa = sumGrad / x
                         Student.findOneAndUpdate({ rollNo: studRollNo[i] }, { $push: { SGPA: sgpa } }).then(() => {
-                            console.log("added cgpa")
+                            console.log("added sgpa")
                         })
+
+
+                        
                     }
 
 
@@ -964,6 +968,9 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                     console.log("success")
                 })
 
+                res.json({
+                    success: "Progress added successfully",
+                })
 
             }
 
@@ -978,7 +985,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                 }
             }
             res.json({
-                success: "Progress added successfully"
+                success: "Progress added successfully",
             })
         }
         else {
@@ -1021,7 +1028,7 @@ router.get('/courses/:facultyId', verifyToken, async (req, res) => {
 router.get('/result/:RollNo', verifyToken, async (req, res) => {
     try {
         var rollNo = req.params.RollNo;
-        const dataItem = await Student.find({ rollNo: rollNo }).select({ result: 1 })
+        const dataItem = await Student.find({ rollNo: rollNo }).select({ result: 1 ,SGPA:1,CGPA:1})
         if (dataItem.length == 0) {
             res.status(200).json({
                 message: "No students are there"
@@ -1029,7 +1036,9 @@ router.get('/result/:RollNo', verifyToken, async (req, res) => {
         }
         else {
             res.status(200).json({
-                result: dataItem[0].result
+                result: dataItem[0].result,
+                SGPA:dataItem[0].SGPA,
+                CGPA:dataItem[0].CGPA
             })
         }
 
