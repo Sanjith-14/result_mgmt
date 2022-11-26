@@ -251,23 +251,30 @@ router.get('/admin-detail/:adminId', verifyToken, async (req, res) => {
 
 
 
-router.get('/get-mark',async (req,res)=>{
+router.get('/get-mark', async (req, res) => {
     const batchYear = req.body.batchYear
     const dept = req.body.dept
     const sem = req.body.sem
     const courseId = req.body.courseId
     const examType = req.body.examType
 
-    const data = await Batch.find({batchYear:batchYear,dept:dept}).select({students:1})
-    data[0].students.forEach(async (studs)=>{
-        const student = await Student.find({rollNo:studs}).select({name:1,rollNo:1,result:1})
+    const studentRollNo = []
+    const marks = []
+    const data = await Batch.find({ batchYear: batchYear, dept: dept }).select({ students: 1 })
+    for (let i = 0; i < data[0].students.length; i++) {
+        // data[0].students.forEach(async (studs)=>{
+        studentRollNo[i] = data[0].students[i]
+        const student = await Student.find({ rollNo: studentRollNo[i] }).select({ name: 1, rollNo: 1, result: 1 })
         // console.log(student[0].result[sem-1].subjectMarks)
-        for(let i=0;i<student[0].result[sem-1].subjectMarks.length;i++){
-            if(student[0].result[sem-1].subjectMarks[i].courseId == courseId){
-                console.log("Mark :" + student[0].result[sem-1].subjectMarks[i].marks.cat1)
+        for (let i = 0; i < student[0].result[sem - 1].subjectMarks.length; i++) {
+            if (student[0].result[sem - 1].subjectMarks[i].courseId == courseId) {
+                console.log(examType)
+                console.log("Mark :" + student[0].result[sem - 1].subjectMarks[i].marks.cat1)
             }
         }
-    })
+        // })
+    }
+    console.log(studentRollNo)
 })
 
 
@@ -791,7 +798,7 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
                 { $set: { "result.$[resElement].subjectMarks": [] } },
                 { arrayFilters: [{ "resElement.semNo": currentSem }] }
             )
-            
+
             // for (let i = 0; i < oldCourseId.length; i++) {
             //     const del = await Enrollment.findOneAndDelete(
             //         {batchYear:batchYear , department:department,courseId:oldCourseId[i]}
@@ -799,12 +806,12 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
             //     console.log("Deleted")
             // }
 
-            const del = await Enrollment.deleteMany({batchYear:batchYear , department:department})
+            const del = await Enrollment.deleteMany({ batchYear: batchYear, department: department })
             console.log("Deleted..")
 
 
             for (let i = 0; i < courseId.length; i++) {
-                const enrollment = new Enrollment({ batchYear: batchYear, department: department, courseId: courseId[i], courseName: courseName[i], facultyId: faculties[i], semNo: currentSem, isCompleted: false , courseType:courseType[i] })
+                const enrollment = new Enrollment({ batchYear: batchYear, department: department, courseId: courseId[i], courseName: courseName[i], facultyId: faculties[i], semNo: currentSem, isCompleted: false, courseType: courseType[i] })
                 await enrollment.save()
             }
 
@@ -875,7 +882,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                             break;
                         }
                     }
-                    // console.log(index);
+                    console.log("index"+index);
 
                     var gradeInt;
                     const temp = student[0].result[currentSem - 1].subjectMarks[index].marks
@@ -885,10 +892,10 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                     const subtype = await Course.find({ _id: courseId }).select({ type: 1, _id: 0 })
                     // console.log(subtype[0].type)
 
-                    if (subtype.type == "theory") {
+                    if (subtype[0].type == "theory") {
                         mark = temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment
                     }
-                    else if (subtype.type == 'embedded') {
+                    else if (subtype[0].type == 'embedded') {
                         mark = (temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment) * 0.6 + (temp.lab * 0.4)
                     }
                     gradeInt = Math.ceil(mark / 10) - 1
@@ -923,9 +930,9 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                             var grad = reGrade[0] == 'O' ? 10 : reGrade[0] == 'A+' ? 9 : reGrade[0] == 'A' ? 8 : reGrade[0] == 'B+' ? 7 : reGrade[0] == 'B' ? 6 : 1
                             sumGrad += grad
                         }
-                        var sgpa = sumGrad/i
+                        var sgpa = sumGrad / i
                         Student.findOneAndUpdate({ rollNo: studRollNo[i] }, { $push: { SGPA: sgpa } }).then(() => {
-                            console.log("added cgpa")  
+                            console.log("added cgpa")
                         })
                     }
 
