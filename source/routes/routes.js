@@ -281,8 +281,8 @@ router.get('/get-mark', async (req, res) => {
     console.log(studentRollNo)
     console.log(marks)
     res.json({
-        studentRollNo:studentRollNo,
-        marks:marks
+        studentRollNo: studentRollNo,
+        marks: marks
     })
 })
 
@@ -881,6 +881,9 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                         { $set: { [setField]: marks[i] } },
                         { arrayFilters: [{ "resElement.semNo": currentSem }, { "subElement.courseId": courseId }] }
                     )
+                }
+
+                for (let i = 0; i < studRollNo.length; i++) {
                     // Calculating grade for the student
                     const student = await Student.find({ rollNo: studRollNo[i] }).select({ result: 1, _id: 0 })
                     const data = student[0].result[currentSem - 1].subjectMarks
@@ -891,23 +894,28 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                             break;
                         }
                     }
-                    console.log("index"+index);
+                    console.log("index" + index);
 
                     var gradeInt;
+
                     const temp = student[0].result[currentSem - 1].subjectMarks[index].marks
                     // console.log(student[0].result[currentSem-1].subjectMarks[index].marks)
                     var mark;
 
                     const subtype = await Course.find({ _id: courseId }).select({ type: 1, _id: 0 })
                     // console.log(subtype[0].type)
-                    // if(temp.attendance < 75 || temp.)
+
                     if (subtype[0].type == "theory") {
                         mark = temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment
                     }
-                    else if (subtype[0].type == 'embedded') {
+                    else if (subtype[0].type == "embedded") {
                         mark = (temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment) * 0.6 + (temp.lab * 0.4)
                     }
                     gradeInt = Math.ceil(mark / 10) - 1
+
+                    if (temp.attendance < 75 || temp.lab < 50) {
+                        gradeInt = 0
+                    }
                     // console.log(temp.cat1 + "+" + temp.cat2  + "+" + temp.sem + "20")
                     // console.log(Math.ceil((temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + 20) / 10));
                     // console.log(grades[gradeInt])  //Gives A or O
@@ -923,9 +931,9 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
 
                     // upload cgpa to student
                     let post = 1
-                    const enroll = await Enrollment.find({ semNo: currentSem, department: studRollNo.substring(3, 5) })
-                    for (let j = 0; j < enroll.length; j++) {
-                        if (enroll[j].isCompleted == false) {
+                    const enroll = await Enrollment.find({ semNo: currentSem, department: studRollNo[i].substring(3, 5) })
+                    for (let k = 0; k < enroll.length; k++) {
+                        if (enroll[k].isCompleted == false) {
                             post = 0;
                             break;
                         }
@@ -933,13 +941,13 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                     if (post == 1) {
                         let reGrade = [];
                         let sumGrad = 0
-                        let i;
-                        for (i = 0; i < stud[0].result[currentSem - 1].subjectMarks.length; i++) {
-                            reGrade[0] = stud[0].result[currentSem - 1].subjectMarks[i].marks.grade
+                        let x;
+                        for (x = 0; x < stud[0].result[currentSem - 1].subjectMarks.length; x++) {
+                            reGrade[0] = stud[0].result[currentSem - 1].subjectMarks[x].marks.grade
                             var grad = reGrade[0] == 'O' ? 10 : reGrade[0] == 'A+' ? 9 : reGrade[0] == 'A' ? 8 : reGrade[0] == 'B+' ? 7 : reGrade[0] == 'B' ? 6 : 1
                             sumGrad += grad
                         }
-                        var sgpa = sumGrad / i
+                        var sgpa = sumGrad / x
                         Student.findOneAndUpdate({ rollNo: studRollNo[i] }, { $push: { SGPA: sgpa } }).then(() => {
                             console.log("added cgpa")
                         })
