@@ -37,6 +37,10 @@ const subjectSchema = new mongoose.Schema({
     grade: {
         type: String,
         // required:true
+    },
+    attendance:{
+        type:Number,
+        default:0
     }
 })
 
