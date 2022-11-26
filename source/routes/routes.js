@@ -908,6 +908,9 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                     if (subtype[0].type == "theory" && temp.attendance > 75) {
                         mark = temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment
                     }
+                    else if(subtype[0].type == "theory" && temp.attendance < 75){
+                        mark = 10
+                    }
                     else if (subtype[0].type == "embedded" && temp.lab>50  && temp.attendance > 75) {
                         mark = (temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment) * 0.6 + (temp.lab * 0.4)
                     }
@@ -975,7 +978,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                 }
             }
             res.json({
-                success: "Result added successfully"
+                success: "Progress added successfully"
             })
         }
         else {
