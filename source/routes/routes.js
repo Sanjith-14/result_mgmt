@@ -781,11 +781,32 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
             const faculties = req.body.faculties //array
             const currentSem = req.body.currentSem
             const courseType = req.body.courseType //array
+            // const oldCourseId = req.body.oldCourseId
+
+
+            const res1 = await Student.updateMany(
+                { batchYear: batchYear, department: department },
+                // Added grade..
+                { $set: { "result.$[resElement].subjectMarks": {} } },
+                { arrayFilters: [{ "resElement.semNo": currentSem }] }
+            )
+            
+            // for (let i = 0; i < oldCourseId.length; i++) {
+            //     const del = await Enrollment.findOneAndDelete(
+            //         {batchYear:batchYear , department:department,courseId:oldCourseId[i]}
+            //     )
+            //     console.log("Deleted")
+            // }
+
+            const del = await Enrollment.deleteMany({batchYear:batchYear , department:department})
+            console.log("Deleted..")
+
 
             for (let i = 0; i < courseId.length; i++) {
                 const enrollment = new Enrollment({ batchYear: batchYear, department: department, courseId: courseId[i], courseName: courseName[i], facultyId: faculties[i], semNo: currentSem, isCompleted: false , courseType:courseType[i] })
                 await enrollment.save()
             }
+
             const batch = await Batch.updateOne(
                 { dept: department, batchYear: batchYear },   //filter data
                 { $set: { currentCourses: [...courseId] } },  //data to be inserted
@@ -797,7 +818,7 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
                 const res1 = await Student.updateMany(
                     { batchYear: batchYear, department: department },
                     // Added grade..
-                    { $set: { "result.$[resElement].subjectMarks": { courseId: courseId[i], marks: { "cat1": 0, "cat2": 0, "sem": 0, "lab": 0, "assignment": 0, "grade": '' } } } },
+                    { $push: { "result.$[resElement].subjectMarks": { courseId: courseId[i], marks: { "cat1": 0, "cat2": 0, "sem": 0, "lab": 0, "assignment": 0, "grade": '' } } } },
                     { arrayFilters: [{ "resElement.semNo": currentSem }] }
                 )
             }

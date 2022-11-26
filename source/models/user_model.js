@@ -43,7 +43,8 @@ const subjectSchema = new mongoose.Schema({
 const courseWithMarks = new mongoose.Schema({
     courseId: {
         type: String,
-        required: true
+        required: true,
+        unique:true
     },
     marks: {
         type: subjectSchema,
@@ -71,7 +72,8 @@ const studentSchema = new mongoose.Schema(
     {
         rollNo: {
             type: String,
-            required: true
+            required: true,
+            unique:true
         },
         name: {
             type: String,
@@ -79,7 +81,8 @@ const studentSchema = new mongoose.Schema(
         },
         admissionNo: {
             type: String,
-            required: true
+            required: true,
+            unique:true
         },
         DOB: {
             type: Date,
@@ -93,7 +96,8 @@ const studentSchema = new mongoose.Schema(
         },
         email: {
             type: String,
-            required: true
+            required: true,
+            unique:true
         },
         batchYear: {
             type: String,
@@ -163,7 +167,8 @@ const facultySchema = new mongoose.Schema(
     {
         facultyId: {
             type: String,
-            required: true
+            required: true,
+            unique:true
         },
         name: {
             type: String,
@@ -185,7 +190,8 @@ const facultySchema = new mongoose.Schema(
         },
         email: {
             type: String,
-            required: true
+            required: true,
+            unique:true
         },
         addressLine1: {
             type: String,
@@ -225,7 +231,8 @@ const adminSchema = new mongoose.Schema(
     {
         adminId: {
             type: String,
-            required: true
+            required: true,
+            unique:true
         },
         name: {
             type: String,
@@ -237,7 +244,8 @@ const adminSchema = new mongoose.Schema(
         },
         email: {
             type: String,
-            required: true
+            required: true,
+            unique:true
         },
         addressLine1: {
             type: String,
@@ -279,7 +287,8 @@ const Admin = mongoose.model('Admin', adminSchema)
 const CourseSchema = new mongoose.Schema({
     _id: {
         type: String,
-        required: true
+        required: true,
+        unique:true
     },
     name: {
         type: String,
@@ -392,7 +401,8 @@ const Enrollment = mongoose.model('Enroll', enrollSchema)
 const credentialSchema = new mongoose.Schema({
     email: {
         type: String,
-        required: true
+        required: true,
+        unique:true
     },
     password: {
         type: String,
