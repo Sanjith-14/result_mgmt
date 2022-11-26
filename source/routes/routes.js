@@ -969,7 +969,7 @@ router.get('/courses/:facultyId', verifyToken, async (req, res) => {
             const dataItem = await Enrollment.find({ facultyId: req.params.facultyId })
             if (dataItem.length == 0) {
                 res.status(200).json({
-                    message: "No courses"
+                    classes: []
                 })
             }
             else {
