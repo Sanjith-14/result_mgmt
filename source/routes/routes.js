@@ -260,21 +260,30 @@ router.get('/get-mark', async (req, res) => {
 
     const studentRollNo = []
     const marks = []
+    console.log(examType)
     const data = await Batch.find({ batchYear: batchYear, dept: dept }).select({ students: 1 })
+    console.log("he;;p")
+    console.log(data[0])
     for (let i = 0; i < data[0].students.length; i++) {
+        console.log(data[0].students[i])
         // data[0].students.forEach(async (studs)=>{
         studentRollNo[i] = data[0].students[i]
         const student = await Student.find({ rollNo: studentRollNo[i] }).select({ name: 1, rollNo: 1, result: 1 })
         // console.log(student[0].result[sem-1].subjectMarks)
-        for (let i = 0; i < student[0].result[sem - 1].subjectMarks.length; i++) {
-            if (student[0].result[sem - 1].subjectMarks[i].courseId == courseId) {
-                console.log(examType)
+        for (let j = 0; j < student[0].result[sem - 1].subjectMarks.length; j++) {
+            if (student[0].result[sem - 1].subjectMarks[j].courseId == courseId) {
+                marks[i] = student[0].result[sem - 1].subjectMarks[j].marks.cat1
                 console.log("Mark :" + student[0].result[sem - 1].subjectMarks[i].marks.cat1)
             }
         }
         // })
     }
     console.log(studentRollNo)
+    console.log(marks)
+    res.json({
+        studentRollNo:studentRollNo,
+        marks:marks
+    })
 })
 
 
@@ -826,7 +835,7 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
                 const res1 = await Student.updateMany(
                     { batchYear: batchYear, department: department },
                     // Added grade..
-                    { $push: { "result.$[resElement].subjectMarks": { courseId: courseId[i], marks: { "cat1": 0, "cat2": 0, "sem": 0, "lab": 0, "assignment": 0, "grade": '' } } } },
+                    { $push: { "result.$[resElement].subjectMarks": { courseId: courseId[i], courseType: courseType[i], marks: { "cat1": 0, "cat2": 0, "sem": 0, "lab": 0, "assignment": 0, "grade": '' } } } },
                     { arrayFilters: [{ "resElement.semNo": currentSem }] }
                 )
             }
@@ -876,9 +885,9 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                     const student = await Student.find({ rollNo: studRollNo[i] }).select({ result: 1, _id: 0 })
                     const data = student[0].result[currentSem - 1].subjectMarks
                     var index;
-                    for (let i = 0; i < data.length; i++) {
-                        if (data[i].courseId == courseId) {
-                            index = i
+                    for (let j = 0; j < data.length; j++) {
+                        if (data[j].courseId == courseId) {
+                            index = j
                             break;
                         }
                     }
@@ -891,7 +900,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
 
                     const subtype = await Course.find({ _id: courseId }).select({ type: 1, _id: 0 })
                     // console.log(subtype[0].type)
-
+                    // if(temp.attendance < 75 || temp.)
                     if (subtype[0].type == "theory") {
                         mark = temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment
                     }

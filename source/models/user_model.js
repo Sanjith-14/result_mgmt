@@ -50,6 +50,11 @@ const courseWithMarks = new mongoose.Schema({
         required: true,
         unique:true
     },
+    // new field..
+    courseType:{
+        type:String,
+        required:true
+    },
     marks: {
         type: subjectSchema,
         required: true
