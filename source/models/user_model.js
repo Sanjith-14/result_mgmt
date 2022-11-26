@@ -140,6 +140,14 @@ const studentSchema = new mongoose.Schema(
             type: [semesterSchema],
             default: [],
         },
+        SGPA:{
+            type:Array,
+            default : []
+        },
+        CGPA:{
+            type:Number,
+            default:0
+        },
         image: {
             data: Buffer,
             contentType: String
@@ -367,6 +375,10 @@ const enrollSchema = new mongoose.Schema({
     semNo: {
         type: Number,
         required: true
+    },
+    courseType:{
+        type:String,
+        required:true
     },
     isCompleted: {
         type: Boolean,

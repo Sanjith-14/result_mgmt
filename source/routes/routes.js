@@ -48,7 +48,9 @@ const Admin = item.Admin
 //Getting ready(Home page)..
 router.get('/', async (req, res) => {
     try {
-
+        const currentSem = 2
+        const rollNo = "20BEE100"
+        const stud = await Student.find({ rollNo: rollNo }).select({ result: 1 })
         res.status(200).json({
             message: "Welcome to Result Management system",
             // details: req.user //maybe the user details from middleware
@@ -114,8 +116,6 @@ router.put('/forget-password', async (req, res) => {
 })
 
 
-
-
 // Post request for add admin
 router.post('/add-admin', verifyToken, async (req, res) => {
     try {
@@ -145,7 +145,6 @@ router.post('/add-admin', verifyToken, async (req, res) => {
 
                     if (flag == 0) {
 
-
                         const admin = new Admin({
                             adminId: req.body.adminId, name: req.body.name, DOB: req.body.DOB, email: req.body.email, addressLine1: req.body.addressLine1, addressLine2: req.body.addressLine2, city: req.body.city, state: req.body.state, country: req.body.country, phoneNum: req.body.phoneNum,
                             image: {
@@ -170,9 +169,6 @@ router.post('/add-admin', verifyToken, async (req, res) => {
 
                 }
             })
-
-
-
 
         }
         else {
@@ -226,7 +222,7 @@ router.get('/admins', verifyToken, async (req, res) => {
 //To get the detail of particular student
 router.get('/admin-detail/:adminId', verifyToken, async (req, res) => {
     try {
-        if (req.user.role == "admin" ) {
+        if (req.user.role == "admin") {
             var adminId = req.params.adminId;
             const dataItem = await Admin.find({ adminId: adminId })
             // console.log(dataItem)
@@ -392,12 +388,6 @@ router.put('/update-student', verifyToken, async (req, res) => {
             phoneNum: req.body.phoneNum
         }
 
-        // const updatedData = { $set:
-        //     {
-        //      "name" :req.body.name
-        //     }
-        // }
-
         const dataItem = await Student.updateOne(filter, updatedData).then((data) => {
             res.json({
                 data: data,
@@ -467,7 +457,7 @@ router.get('/faculties', verifyToken, async (req, res) => {
 //To get the detail of particular faculty
 router.get('/faculty-detail/:facultyId', verifyToken, async (req, res) => {
     try {
-        if (req.user.role == "faculty" || req.user.role == "admin" ) {
+        if (req.user.role == "faculty" || req.user.role == "admin") {
             var facultyId = req.params.facultyId;
             const dataItem = await Faculty.find({ facultyId: facultyId })
             // console.log(dataItem)
@@ -764,8 +754,10 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
             const courseName = req.body.courseName //array
             const faculties = req.body.faculties //array
             const currentSem = req.body.currentSem
+            const courseType = req.body.courseType //array
+
             for (let i = 0; i < courseId.length; i++) {
-                const enrollment = new Enrollment({ batchYear: batchYear, department: department, courseId: courseId[i], courseName: courseName[i], facultyId: faculties[i], semNo: currentSem, isCompleted: false })
+                const enrollment = new Enrollment({ batchYear: batchYear, department: department, courseId: courseId[i], courseName: courseName[i], facultyId: faculties[i], semNo: currentSem, isCompleted: false , courseType:courseType[i] })
                 await enrollment.save()
             }
             const batch = await Batch.updateOne(
@@ -786,7 +778,7 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
             // console.log("Updated end..");
             // Added successfully.
             res.json({
-                message: "Enrolled Successfully"
+                success: "Enrolled Successfully"
             })
         }
         else {
@@ -811,6 +803,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
             let courseId = req.body.courseId
             const currentSem = req.body.currentSem
             const marks = req.body.marks  //array
+
             // ends
             if (examType == "sem") {
 
@@ -844,10 +837,10 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                     const subtype = await Course.find({ _id: courseId }).select({ type: 1, _id: 0 })
                     // console.log(subtype[0].type)
 
-                    if (subtype[0].type == "theory") {
+                    if (subtype.type == "theory") {
                         mark = temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment
                     }
-                    else if (subtype[0].type == 'embedded') {
+                    else if (subtype.type == 'embedded') {
                         mark = (temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment) * 0.6 + (temp.lab * 0.4)
                     }
                     gradeInt = Math.ceil(mark / 10) - 1
@@ -862,11 +855,40 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                         { arrayFilters: [{ "resElement.semNo": currentSem }, { "subElement.courseId": courseId }] }
                     )
 
+
+
+                    // upload cgpa to student
+                    let post = 1
+                    const enroll = await Enrollment.find({ semNo: currentSem, department: studRollNo.substring(3, 5) })
+                    for (let j = 0; j < enroll.length; j++) {
+                        if (enroll[j].isCompleted == false) {
+                            post = 0;
+                            break;
+                        }
+                    }
+                    if (post == 1) {
+                        let reGrade = [];
+                        let sumGrad = 0
+                        let i;
+                        for (i = 0; i < stud[0].result[currentSem - 1].subjectMarks.length; i++) {
+                            reGrade[0] = stud[0].result[currentSem - 1].subjectMarks[i].marks.grade
+                            var grad = reGrade[0] == 'O' ? 10 : reGrade[0] == 'A+' ? 9 : reGrade[0] == 'A' ? 8 : reGrade[0] == 'B+' ? 7 : reGrade[0] == 'B' ? 6 : 1
+                            sumGrad += grad
+                        }
+                        var sgpa = sumGrad/i
+                        Student.findOneAndUpdate({ rollNo: studRollNo[i] }, { $push: { SGPA: sgpa } }).then(() => {
+                            console.log("added cgpa")  
+                        })
+                    }
+
+
                 }
 
                 Enrollment.findOneAndUpdate({ courseId: courseId }, { $set: { isCompleted: true } }).then(() => {
                     console.log("success")
                 })
+
+
             }
 
             else {
@@ -880,7 +902,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                 }
             }
             res.json({
-                "message": "Result added successfully"
+                success: "Result added successfully"
             })
         }
         else {
@@ -922,7 +944,8 @@ router.get('/courses/:facultyId', verifyToken, async (req, res) => {
 // To get result for particular student..
 router.get('/result/:RollNo', verifyToken, async (req, res) => {
     try {
-        const dataItem = await Student.find({ RollNo: req.params.RollNo }).select({ result: 1, _id: 0 })
+        var rollNo = req.params.RollNo;
+        const dataItem = await Student.find({ rollNo: rollNo }).select({ result: 1 })
         if (dataItem.length == 0) {
             res.status(200).json({
                 message: "No students are there"
@@ -939,28 +962,6 @@ router.get('/result/:RollNo', verifyToken, async (req, res) => {
         return res.send(error)
     }
 })
-
-
-//add credential..
-// router.post('/add-credentail', verifyToken, async (req, res) => {
-//     try {
-//         if (req.user.role == "admin") {
-//             const { email, password, role } = req.body;
-//             //save in db
-//             const credentail = new Credential({ email: email, password: password, role: role })
-//             await credentail.save()
-//             // if status is 200 , just send that..
-//             return res.status(200).json({
-//                 credential: { email, password, role }
-//             })
-//         }
-//         else {
-//             res.status(401).json({ message: "unauthorized" })
-//         }
-//     } catch (error) {
-//         res.send({ error })
-//     }
-// });
 
 //for login with email and password..
 router.get('/login-user', async (req, res) => {
@@ -1162,7 +1163,6 @@ router.get('/get-dropdown', verifyToken, (req, res) => {
         res.status(401).json({ message: "unauthorized" })
     }
 })
-
 
 
 module.exports = router;
