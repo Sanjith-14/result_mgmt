@@ -287,7 +287,7 @@ const CourseSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['Theory', 'Embedded', 'Lab'],
+        enum: ['theory', 'embedded', 'lab'],
         required: true,
     },
     hours: {

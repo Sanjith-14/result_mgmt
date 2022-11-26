@@ -48,6 +48,7 @@ const Admin = item.Admin
 //Getting ready(Home page)..
 router.get('/', async (req, res) => {
     try {
+
         res.status(200).json({
             message: "Welcome to Result Management system",
             // details: req.user //maybe the user details from middleware
@@ -143,6 +144,8 @@ router.post('/add-admin', verifyToken, async (req, res) => {
 
 
                     if (flag == 0) {
+
+
                         const admin = new Admin({
                             adminId: req.body.adminId, name: req.body.name, DOB: req.body.DOB, email: req.body.email, addressLine1: req.body.addressLine1, addressLine2: req.body.addressLine2, city: req.body.city, state: req.body.state, country: req.body.country, phoneNum: req.body.phoneNum,
                             image: {
@@ -180,6 +183,43 @@ router.post('/add-admin', verifyToken, async (req, res) => {
     }
 });
 
+// delete admin
+router.delete('/delete-admin', verifyToken, async (req, res) => {
+    if (req.user.role == 'admin') {
+        const filter = { adminId: req.body.adminId }  //using this field , we filter these datas..
+        await Admin.deleteOne(filter).then((data) => {
+            res.json({
+                data: data,
+                success: "Admin deleted sucessfully"
+            })
+        }).catch((err) => {
+            return res.send(err);
+        })
+    }
+    else {
+        res.status(401).json({ message: "unauthorized" })
+    }
+})
+
+
+// Get all Faculties..
+router.get('/admins', verifyToken, async (req, res) => {
+    try {
+        if (req.user.role == 'admin') {
+            const dataItem = await Admin.find({})
+            res.status(200).json({
+                admin: dataItem
+            })
+        }
+        else {
+            res.status(401).json({ message: "unauthorized" })
+        }
+
+    }
+    catch (error) {
+        return res.send(error)
+    }
+})
 
 
 // Get all students..
@@ -342,7 +382,7 @@ router.put('/update-student', verifyToken, async (req, res) => {
 })
 
 
-// Delete student
+// Delete student if delete also remove details in credentials
 router.delete('/delete-student', verifyToken, async (req, res) => {
     try {
         if (req.user.role == 'admin') {
@@ -737,9 +777,22 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                         }
                     }
                     // console.log(index);
+
+                    var gradeInt;
                     const temp = student[0].result[currentSem - 1].subjectMarks[index].marks
                     // console.log(student[0].result[currentSem-1].subjectMarks[index].marks)
-                    const gradeInt = Math.ceil((temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + 20) / 10) - 1
+                    var mark;
+
+                    const subtype = await Course.find({ _id: courseId }).select({ type: 1, _id: 0 })
+                    // console.log(subtype[0].type)
+
+                    if (subtype[0].type == "theory") {
+                        mark = temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment
+                    }
+                    else if (subtype[0].type == 'embedded') {
+                        mark = (temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment) * 0.6 + (temp.lab * 0.4)
+                    }
+                    gradeInt = Math.ceil(mark / 10) - 1
                     // console.log(temp.cat1 + "+" + temp.cat2  + "+" + temp.sem + "20")
                     // console.log(Math.ceil((temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + 20) / 10));
                     // console.log(grades[gradeInt])  //Gives A or O
@@ -807,6 +860,7 @@ router.get('/courses/:facultyId', verifyToken, async (req, res) => {
     }
 })
 
+// get roll no by decrypt token
 // To get result for particular student..
 router.get('/result/:RollNo', verifyToken, async (req, res) => {
     try {
@@ -939,7 +993,7 @@ router.get('/social-login', async (req, res) => {
             }
 
         }
-
+        "admin"
     }
     catch (error) {
         return res.send(error)
@@ -970,7 +1024,8 @@ router.put('/promote-batch', verifyToken, async (req, res) => {
 // add assignment..
 // {cat1:true,cat2:false}
 
-var dropDown = { "cat1": false, "cat2": false, "sem": false, "lab": false }
+
+var dropDown = { "cat1": false, "cat2": false, "sem": false, "lab": false, "assignment": false, "attendance": false }
 var dropDownUpdated = dropDown;
 
 router.put('/edit-dropdown', verifyToken, (req, res) => {
@@ -983,24 +1038,48 @@ router.put('/edit-dropdown', verifyToken, (req, res) => {
                 updated.cat2 = false
                 updated.sem = false
                 updated.lab = false
+                updated.assignment = false
+                updated.attendance = false
             }
             else if (examType == 'cat2') {
                 updated.cat1 = false
                 updated.cat2 = true
                 updated.sem = false
                 updated.lab = false
+                updated.assignment = false
+                updated.attendance = false
             }
             else if (examType == 'sem') {
                 updated.cat1 = false
                 updated.cat2 = false
                 updated.sem = true
                 updated.lab = false
+                updated.assignment = false
+                updated.attendance = false
             }
             else if (examType == 'lab') {
                 updated.cat1 = false
                 updated.cat2 = false
                 updated.sem = false
                 updated.lab = true
+                updated.assignment = false
+                updated.attendance = false
+            }
+            else if (examType == 'assignment') {
+                updated.cat1 = false
+                updated.cat2 = false
+                updated.sem = false
+                updated.lab = false
+                updated.assignment = true
+                updated.attendance = false
+            }
+            else if (examType == 'attendance') {
+                updated.cat1 = false
+                updated.cat2 = false
+                updated.sem = false
+                updated.lab = false
+                updated.assignment = false
+                updated.attendance = true
             }
             dropDownUpdated = updated
             return res.status(200).json({ dropDown: dropDownUpdated })
