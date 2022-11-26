@@ -905,17 +905,18 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                     const subtype = await Course.find({ _id: courseId }).select({ type: 1, _id: 0 })
                     // console.log(subtype[0].type)
 
-                    if (subtype[0].type == "theory") {
+                    if (subtype[0].type == "theory" && temp.attendance > 75) {
                         mark = temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment
                     }
-                    else if (subtype[0].type == "embedded") {
+                    else if (subtype[0].type == "embedded" && temp.lab>50  && temp.attendance > 75) {
                         mark = (temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment) * 0.6 + (temp.lab * 0.4)
+                    }
+                    else if(subtype[0].type == "embedded" && (temp.lab<50 || temp.attendance < 75)){
+                        mark = 10
                     }
                     gradeInt = Math.ceil(mark / 10) - 1
 
-                    if (temp.attendance < 75 || temp.lab < 50) {
-                        gradeInt = 0
-                    }
+                    
                     // console.log(temp.cat1 + "+" + temp.cat2  + "+" + temp.sem + "20")
                     // console.log(Math.ceil((temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + 20) / 10));
                     // console.log(grades[gradeInt])  //Gives A or O
@@ -944,7 +945,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                         let x;
                         for (x = 0; x < stud[0].result[currentSem - 1].subjectMarks.length; x++) {
                             reGrade[0] = stud[0].result[currentSem - 1].subjectMarks[x].marks.grade
-                            var grad = reGrade[0] == 'O' ? 10 : reGrade[0] == 'A+' ? 9 : reGrade[0] == 'A' ? 8 : reGrade[0] == 'B+' ? 7 : reGrade[0] == 'B' ? 6 : 1
+                            var grad = reGrade[0] == 'O' ? 10 : reGrade[0] == 'A+' ? 9 : reGrade[0] == 'A' ? 8 : reGrade[0] == 'B+' ? 7 : reGrade[0] == 'B' ? 6 : 0  //just no changes to o :-(
                             sumGrad += grad
                         }
                         var sgpa = sumGrad / x
