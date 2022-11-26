@@ -222,6 +222,37 @@ router.get('/admins', verifyToken, async (req, res) => {
 })
 
 
+
+//To get the detail of particular student
+router.get('/admin-detail/:adminId', verifyToken, async (req, res) => {
+    try {
+        if (req.user.role == "admin" ) {
+            var adminId = req.params.adminId;
+            const dataItem = await Admin.find({ adminId: adminId })
+            // console.log(dataItem)
+            if (dataItem.length == 0) {
+                res.json({
+                    message: "Invalid Admin"
+                })
+            }
+            // console.log(dataItem.length())
+            else {
+                res.status(200).json({
+                    adminDetail: dataItem
+                })
+            }
+        }
+        else {
+            res.status(401).json({ message: "unauthorized" })
+        }
+
+    }
+    catch (error) {
+        return res.send(error)
+    }
+})
+
+
 // Get all students..
 // by department , batch
 router.get('/students', verifyToken, async (req, res) => {
@@ -256,7 +287,7 @@ router.get('/students', verifyToken, async (req, res) => {
 //To get the detail of particular student
 router.get('/student-detail/:rollNo', verifyToken, async (req, res) => {
     try {
-        if (req.user.role == "faculty" || req.user.role == "admin") {
+        if (req.user.role == "faculty" || req.user.role == "admin" || req.user.role == "student") {
             var rollNo = req.params.rollNo;
             const dataItem = await Student.find({ rollNo: rollNo }).select({ result: 0 })
             // console.log(dataItem)
@@ -433,7 +464,34 @@ router.get('/faculties', verifyToken, async (req, res) => {
     }
 })
 
+//To get the detail of particular faculty
+router.get('/faculty-detail/:facultyId', verifyToken, async (req, res) => {
+    try {
+        if (req.user.role == "faculty" || req.user.role == "admin" ) {
+            var facultyId = req.params.facultyId;
+            const dataItem = await Faculty.find({ facultyId: facultyId })
+            // console.log(dataItem)
+            if (dataItem.length == 0) {
+                res.json({
+                    message: "Invalid Faculty"
+                })
+            }
+            // console.log(dataItem.length())
+            else {
+                res.status(200).json({
+                    facultyDetail: dataItem
+                })
+            }
+        }
+        else {
+            res.status(401).json({ message: "unauthorized" })
+        }
 
+    }
+    catch (error) {
+        return res.send(error)
+    }
+})
 
 // Get all Faculties is..
 router.get('/faculties-details', verifyToken, async (req, res) => {
