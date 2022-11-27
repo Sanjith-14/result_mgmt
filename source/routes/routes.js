@@ -113,33 +113,38 @@ router.put('/forget-password', async (req, res) => {
 
 
 // Post request for add admin
-router.post('/add-admin', async (req, res) => {
+router.post('/add-admin', verifyToken, async (req, res) => {
     try {
-        const { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum } = req.body;
-        //save in db
-        let flag = 0;
-        const existingAdmin = await Admin.find({}).select({ adminId: 1 })
-        existingAdmin.forEach((data) => {
-            if (data.adminId == adminId) {
-                flag = 1;
-                return res.json({ message: "Admin already exists" })
-            }
-        })
-
-        if (flag == 0) {
-            const admin = new Admin({ adminId : adminId, name:name, DOB:DOB, email:email, addressLine1:addressLine1, addressLine2:addressLine2, city:city, state:state, country:country, phoneNum:phoneNum })
-            await admin.save()
-
-
-            const credentail = new Credential({ email: email, password: adminId, role: "admin" })
-            await credentail.save()
-
-
-            // if status is 200 , just send that..
-            return res.status(200).json({
-                admin: { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum },
-                success: "Admin added sucessfully"
+        if (req.user.role == 'admin') {
+            const { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum } = req.body;
+            //save in db
+            let flag = 0;
+            const existingAdmin = await Admin.find({}).select({ adminId: 1 })
+            existingAdmin.forEach((data) => {
+                if (data.adminId == adminId) {
+                    flag = 1;
+                    return res.json({ message: "Admin already exists" })
+                }
             })
+
+            if (flag == 0) {
+                const admin = new Admin({ adminId: adminId, name: name, DOB: DOB, email: email, addressLine1: addressLine1, addressLine2: addressLine2, city: city, state: state, country: country, phoneNum: phoneNum })
+                await admin.save()
+
+
+                const credentail = new Credential({ email: email, password: adminId, role: "admin" })
+                await credentail.save()
+
+
+                // if status is 200 , just send that..
+                return res.status(200).json({
+                    admin: { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum },
+                    success: "Admin added sucessfully"
+                })
+            }
+        }
+        else {
+            res.status(401).json({ message: "unauthorized" })
         }
 
     } catch (error) {
