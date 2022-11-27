@@ -48,49 +48,10 @@ const Admin = item.Admin
 //Getting ready(Home page)..
 router.get('/', async (req, res) => {
     try {
-        let post = 1
-        const student = await Student.find({ rollNo: "22BIT001" }).select({ result: 1, _id: 0 })
-        let currentSem = 1
-        if (post == 1) {
-            let reGrade = [];
-            let sumGrad = 0
-            let sumCredits = 0
-            let x;
-            for (x = 0; x < student[0].result[currentSem - 1].subjectMarks.length; x++) {
-                console.log("Hello")
-                var course = await Course.find({ _id: student[0].result[currentSem - 1].subjectMarks[x].courseId }).select({ credits: 1 })
-                var credit = course[0].credits
-                sumCredits += credit
-
-                reGrade[0] = student[0].result[currentSem - 1].subjectMarks[x].marks.grade
-                var grad = reGrade[0] == 'O' ? 10 : reGrade[0] == 'A+' ? 9 : reGrade[0] == 'A' ? 8 : reGrade[0] == 'B+' ? 7 : reGrade[0] == 'B' ? 6 : 0  //just no changes to o :-(
-                sumGrad += (grad * credit)
-            }
-            var sgpa = sumGrad / sumCredits
-            await Student.findOneAndUpdate({ rollNo: studRollNo[i] }, { $push: { SGPA: sgpa } }).then(() => {
-                console.log("added sgpa")
-            })
-
-            const stud = await Student.find({ rollNo: studRollNo[i] }).select({ SGPA: 1 })
-            const len = stud[0].SGPA.length
-            var sum = 0;
-            stud[0].SGPA.forEach(e => {
-                sum += e
-            });
-            const cgpa = sum / len
-            console.log("CGPA : " + cgpa)
-
-            await Student.findOneAndUpdate({ rollNo: "22BIT001" }, { $set: { CGPA: cgpa } }).then(() => {
-                console.log("added cgpa")
-            })
-
-        }
-
         res.status(200).json({
-            message: enroll,
+            message: "Welcome to result management.",
             // details: req.user //maybe the user details from middleware
         })
-
     }
     catch (error) {
         res.send(error)
@@ -128,7 +89,7 @@ router.put('/change-password', verifyToken, async (req, res) => {
             res.status(200).json({ message: "Old & new password are same" })
         }
         else {
-            const credential = Credential.findOneAndUpdate({ email: email }, { password: updatedpassword })
+            const credential = await Credential.findOneAndUpdate({ email: email }, { password: updatedpassword })
             res.status(200).json({ message: "Password changed successfully" })
         }
     } catch (error) {
@@ -902,14 +863,6 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
 
 // Adding result to student
 router.put('/faculty-add-result', verifyToken, async (req, res) => {
-
-
-    async function getCredits(courseId) {
-        var course = await Course.find({ courseId: courseId }).select({ credit: 1, _id: 0 })
-        console.log(course)
-    }
-
-
     try {
         if (req.user.role == 'faculty') {
             // Give result structure to all students..
@@ -1030,10 +983,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                         })
 
                     }
-
                 }
-
-                
 
                 res.json({
                     success: "Progress added successfully",
