@@ -724,7 +724,7 @@ router.get('/courses/:courseId', verifyToken, async (req, res) => {
 router.get('/current-course', verifyToken, async (req, res) => {
     try {
         const {batchYear , department} = req.body
-        const dataItem = await Batch.find({ batchYear:batchYear , dept:department })
+        const dataItem = await Batch.find({ batchYear:batchYear , dept:department }).select({currentCourses:1})
         console.log(dataItem)
         if (dataItem.length == 0) {
             res.json({
