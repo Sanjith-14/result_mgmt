@@ -951,7 +951,9 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                         { arrayFilters: [{ "resElement.semNo": currentSem }, { "subElement.courseId": courseId }] }
                     )
 
-
+                    Enrollment.findOneAndUpdate({ courseId: courseId , department:studRollNo[i].substring(3, 5) , batchYear:batchYear ,semNo:currentSem }, { $set: { isCompleted: true } }).then(() => {
+                        console.log("success")
+                    })
 
                     // upload cgpa to student
                     let post = 1
@@ -999,9 +1001,9 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
 
                 }
 
-                Enrollment.findOneAndUpdate({ courseId: courseId }, { $set: { isCompleted: true } }).then(() => {
-                    console.log("success")
-                })
+                // Enrollment.findOneAndUpdate({ courseId: courseId }, { $set: { isCompleted: true } }).then(() => {
+                //     console.log("success")
+                // })
 
                 res.json({
                     success: "Progress added successfully",
