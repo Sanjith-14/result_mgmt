@@ -696,6 +696,54 @@ router.get('/courses/sem:semNo', verifyToken, async (req, res) => {
     }
 })
 
+
+router.get('/courses/:courseId', verifyToken, async (req, res) => {
+    try {
+        console.log(req.params.courseId)
+        const dataItem = await Course.find({ _id: req.params.courseId })
+        console.log(dataItem)
+        if (dataItem.length == 0) {
+            res.json({
+                course: []
+            })
+        }
+        // console.log(dataItem.length())
+        else {
+            res.status(200).json({
+                course: dataItem[0]
+            })
+        }
+    }
+    catch (error) {
+        return res.send(error)
+    }
+})
+
+
+// Current course for students..
+router.get('/current-course', verifyToken, async (req, res) => {
+    try {
+        const {batchYear , department} = req.body
+        const dataItem = await Batch.find({ batchYear:batchYear , dept:department })
+        console.log(dataItem)
+        if (dataItem.length == 0) {
+            res.json({
+                currentCourse: []
+            })
+        }
+        // console.log(dataItem.length())
+        else {
+            res.status(200).json({
+                currentCourse: dataItem[0]
+            })
+        }
+    }
+    catch (error) {
+        return res.send(error)
+    }
+})
+
+
 // Post request for add course
 router.post('/add-course', verifyToken, async (req, res) => {
     try {
