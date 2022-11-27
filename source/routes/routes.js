@@ -19,20 +19,8 @@ router.use(express.urlencoded({ extended: true }));
 const verifyToken = require("../../middleware/verifyToken");
 
 
-const multer = require('multer');
-
-// middlewar
-var storage = multer.diskStorage({
-    destination: "uploads",
-    filename: function (req, file, cb) {
-        const originalname = file.originalname;
-        // const extension = originalname.split('.')[-1]
-        // const newFileName = uuid.v1() + " "+extension
-        cb(null, originalname);
-    }
-});
-
-const upload = multer({ storage: storage }).single("image")
+var dropDown = { "cat1": false, "cat2": false, "sem": false, "lab": false, "assignment": false, "attendance": false }
+var dropDownUpdated = dropDown;
 
 
 
@@ -965,7 +953,8 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
 
                     }
                 }
-
+                
+                dropDownUpdated.sem = true
                 res.json({
                     success: "Progress added successfully",
                 })
@@ -1167,8 +1156,7 @@ router.put('/promote-batch', verifyToken, async (req, res) => {
 // {cat1:true,cat2:false}
 
 
-var dropDown = { "cat1": false, "cat2": false, "sem": false, "lab": false, "assignment": false, "attendance": false }
-var dropDownUpdated = dropDown;
+
 
 router.put('/edit-dropdown', verifyToken, (req, res) => {
     if (req.user.role == 'admin') {
@@ -1223,6 +1211,14 @@ router.put('/edit-dropdown', verifyToken, (req, res) => {
                 updated.assignment = false
                 updated.attendance = true
             }
+            else{
+                updated.cat1 = false
+                updated.cat2 = false
+                updated.sem = false
+                updated.lab = false
+                updated.assignment = false
+                updated.attendance = false
+            }
             dropDownUpdated = updated
             return res.status(200).json({ dropDown: dropDownUpdated })
         } catch (error) {
@@ -1235,7 +1231,7 @@ router.put('/edit-dropdown', verifyToken, (req, res) => {
 })
 
 router.get('/get-dropdown', verifyToken, (req, res) => {
-    if (req.user.role == 'faculty') {
+    if (req.user.role == 'faculty' || req.user.role == 'admin') {
         try {
             res.json({ dropDown: dropDownUpdated })
         } catch (error) {
