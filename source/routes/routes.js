@@ -980,7 +980,8 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                     )
 
                 }
-                Enrollment.findOneAndUpdate({ courseId: courseId, department: studRollNo[i].substring(3, 5), batchYear: batchYear, semNo: currentSem }, { $set: { isCompleted: true } }).then(() => {
+
+                Enrollment.findOneAndUpdate({ courseId: courseId, department: studRollNo[0].substring(3, 5), batchYear: batchYear, semNo: currentSem }, { $set: { isCompleted: true } }).then(() => {
                     console.log("success")
                 })
 
@@ -1032,9 +1033,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
 
                 }
 
-                Enrollment.findOneAndUpdate({ courseId: courseId, department: studRollNo[i].substring(3, 5), batchYear: batchYear, semNo: currentSem }, { $set: { isCompleted: true } }).then(() => {
-                    console.log("success")
-                })
+                
 
                 res.json({
                     success: "Progress added successfully",
