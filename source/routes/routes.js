@@ -115,61 +115,33 @@ router.put('/forget-password', async (req, res) => {
 // Post request for add admin
 router.post('/add-admin', async (req, res) => {
     try {
-        if (true) {
-            await item.Check.deleteMany({});
+        const { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum } = req.body;
+        //save in db
+        let flag = 0;
+        const existingAdmin = await Admin.find({}).select({ adminId: 1 })
+        existingAdmin.forEach((data) => {
+            if (data.adminId == adminId) {
+                flag = 1;
+                return res.json({ message: "Admin already exists" })
+            }
+        })
 
-            // Upload image through form-data
-            upload(req, res, async (err) => {
-                if (err) {
-                    console.log(err)
-                }
-                else {
-                    const temp = new item.Check({ id: req.body.adminId })
-                    await temp.save()
-                    const det = await item.Check.find({})
-                    let flag = 0;
-                    const existingAdmins = await Admin.find({}).select({ adminId: 1 })
-                    console.log(existingAdmins)
-                    existingAdmins.forEach((data) => {
-                        if (data.adminId == det[0].id) {
-                            console.log(det[0].id)
-                            flag = 1
-                            return res.json({ message: "Admin already exists" })
-                        }
-                    })
+        if (flag == 0) {
+            const admin = new Admin({ adminId : adminId, name:name, DOB:DOB, email:email, addressLine1:addressLine1, addressLine2:addressLine2, city:city, state:state, country:country, phoneNum:phoneNum })
+            await admin.save()
 
 
-                    if (flag == 0) {
+            const credentail = new Credential({ email: email, password: adminId, role: "admin" })
+            await credentail.save()
 
-                        const admin = new Admin({
-                            adminId: req.body.adminId, name: req.body.name, DOB: req.body.DOB, email: req.body.email, addressLine1: req.body.addressLine1, addressLine2: req.body.addressLine2, city: req.body.city, state: req.body.state, country: req.body.country, phoneNum: req.body.phoneNum,
-                            image: {
-                                data: req.file.filename,
-                                contentType: 'image/png'
-                            }
-                        })
-                        await admin.save().then((_) => {
-                            console.log("Image uploaded...")
-                            // return res.json({ message: "Successfully uploaded",success:"Admin added successfully" })
-                        }).catch((error) => {
-                            return res.send(error)
-                        })
 
-                        const credentail = new Credential({ email: req.body.email, password: det[0].id, role: "admin" })
-                        await credentail.save()
-
-                        return res.status(200).json({
-                            success: "Admin added sucessfully"
-                        })
-                    }
-
-                }
+            // if status is 200 , just send that..
+            return res.status(200).json({
+                admin: { adminId, name, DOB, email, addressLine1, addressLine2, city, state, country, phoneNum },
+                success: "Admin added sucessfully"
             })
+        }
 
-        }
-        else {
-            res.status(401).json({ message: "unauthorized" })
-        }
     } catch (error) {
         res.send(error)
     }
