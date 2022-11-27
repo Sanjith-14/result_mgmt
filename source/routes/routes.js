@@ -96,22 +96,22 @@ router.put('/forget-password', async (req, res) => {
 
 })
 
-router.get('/check-email', async (req,res)=>{
-    try{
+router.get('/check-email', async (req, res) => {
+    try {
         const email = req.body.email
-        const credential = await Credential.find({email:email}).select({email:1})
-        if(credential.length==0){
+        const credential = await Credential.find({ email: email }).select({ email: 1 })
+        if (credential.length == 0) {
             res.status(200).json({
-                message:"Pls enter a valid email"
+                message: "Invalid email"
             })
         }
-        else{
+        else {
             res.status(200).json({
-                message:"Correct email"
+                message: "Correct email"
             })
         }
     }
-    catch(error){
+    catch (error) {
         res.status(401).send(error)
     }
 })
@@ -263,14 +263,25 @@ router.get('/get-mark', verifyToken, async (req, res) => {
                     else if (examType == "lab") {
                         marks[i] = student[0].result[sem - 1].subjectMarks[j].marks.lab
                     }
+                    else if (examType == "assignment") {
+                        marks[i] = student[0].result[sem - 1].subjectMarks[j].marks.assignment
+                    }
+                    else if (examType == "attendance") {
+                        marks[i] = student[0].result[sem - 1].subjectMarks[j].marks.attendance
+                    }
                 }
             }
             // })
         }
-        res.json({
-            studentRollNo: studentRollNo,
-            marks: marks
-        })
+        if (marks.length == 0) {
+            res.status(401).json({ message: "Invalid Course id / examType" })
+        }
+        else {
+            res.json({
+                studentRollNo: studentRollNo,
+                marks: marks
+            })
+        }
     } catch (error) {
         res.status(401).send(error)
     }
