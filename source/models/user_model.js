@@ -48,7 +48,7 @@ const courseWithMarks = new mongoose.Schema({
     courseId: {
         type: String,
         required: true,
-        unique:true
+        // unique:true
     },
     // new field..
     courseType:{
@@ -81,8 +81,7 @@ const studentSchema = new mongoose.Schema(
     {
         rollNo: {
             type: String,
-            required: true,
-            unique:true
+            required: true
         },
         name: {
             type: String,
@@ -90,8 +89,7 @@ const studentSchema = new mongoose.Schema(
         },
         admissionNo: {
             type: String,
-            required: true,
-            unique:true
+            required: true
         },
         DOB: {
             type: Date,
@@ -105,8 +103,7 @@ const studentSchema = new mongoose.Schema(
         },
         email: {
             type: String,
-            required: true,
-            unique:true
+            required: true
         },
         batchYear: {
             type: String,
@@ -160,10 +157,6 @@ const studentSchema = new mongoose.Schema(
         CGPA:{
             type:Number,
             default:0
-        },
-        image: {
-            data: Buffer,
-            contentType: String
         }
     }
 )
@@ -177,7 +170,7 @@ const facultySchema = new mongoose.Schema(
         facultyId: {
             type: String,
             required: true,
-            unique:true
+            // unique:true
         },
         name: {
             type: String,
@@ -200,7 +193,7 @@ const facultySchema = new mongoose.Schema(
         email: {
             type: String,
             required: true,
-            unique:true
+            // unique:true
         },
         addressLine1: {
             type: String,
@@ -241,7 +234,7 @@ const adminSchema = new mongoose.Schema(
         adminId: {
             type: String,
             required: true,
-            unique:true
+            // unique:true
         },
         name: {
             type: String,
@@ -254,7 +247,7 @@ const adminSchema = new mongoose.Schema(
         email: {
             type: String,
             required: true,
-            unique:true
+            // unique:true
         },
         addressLine1: {
             type: String,
@@ -297,7 +290,7 @@ const CourseSchema = new mongoose.Schema({
     _id: {
         type: String,
         required: true,
-        unique:true
+        // unique:true
     },
     name: {
         type: String,
@@ -411,7 +404,7 @@ const credentialSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique:true
+        // unique:true
     },
     password: {
         type: String,
