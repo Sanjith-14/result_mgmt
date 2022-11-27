@@ -53,17 +53,19 @@ router.get('/', async (req, res) => {
         //     console.log("added sgpa")
         // })
 
-        // const stud = await Student.find({rollNo:"20BIT300"}).select({SGPA:1})
+        const stud = await Student.find({rollNo:"22BIT001"})
         // const len = stud[0].SGPA.length
         // var sum = 0;
         // stud[0].SGPA.forEach(e => {
         //     sum+=e
         // });
         // console.log(sum/len)
-
+        var studRollNo = "20BIT047"
+        const enroll = await Enrollment.find({ semNo: 1, department: studRollNo.substring(3, 5), batchYear: 2022 })
+        console.log(stud[0].result[0].subjectMarks.length)
 
         res.status(200).json({
-            message: "Welcome to Result Management system",
+            message:enroll,
             // details: req.user //maybe the user details from middleware
         })
 
@@ -969,13 +971,13 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                         let sumGrad = 0
                         let sumCredits = 0
                         let x;
-                        for (x = 0; x < stud[0].result[currentSem - 1].subjectMarks.length; x++) {
+                        for (x = 0; x < student[0].result[currentSem - 1].subjectMarks.length; x++) {
 
-                            var course = await Course.find({ _id: stud[0].result[currentSem - 1].subjectMarks[x].courseId }).select({ credits: 1 })
+                            var course = await Course.find({ _id: student[0].result[currentSem - 1].subjectMarks[x].courseId }).select({ credits: 1 })
                             var credit = course[0].credits
                             sumCredits += credit
 
-                            reGrade[0] = stud[0].result[currentSem - 1].subjectMarks[x].marks.grade
+                            reGrade[0] = student[0].result[currentSem - 1].subjectMarks[x].marks.grade
                             var grad = reGrade[0] == 'O' ? 10 : reGrade[0] == 'A+' ? 9 : reGrade[0] == 'A' ? 8 : reGrade[0] == 'B+' ? 7 : reGrade[0] == 'B' ? 6 : 0  //just no changes to o :-(
                             sumGrad += (grad * credit)
                         }
