@@ -247,48 +247,52 @@ router.get('/admin-detail/:adminId', verifyToken, async (req, res) => {
 
 
 
-router.get('/get-mark', async (req, res) => {
-    const batchYear = req.body.batchYear
-    const dept = req.body.dept
-    const sem = req.body.sem
-    const courseId = req.body.courseId
-    const examType = req.body.examType
+router.get('/get-mark', verifyToken, async (req, res) => {
+    try {
+        const batchYear = req.body.batchYear
+        const dept = req.body.dept
+        const sem = req.body.sem
+        const courseId = req.body.courseId
+        const examType = req.body.examType
 
-    const studentRollNo = []
-    const marks = []
-    console.log(examType)
-    const data = await Batch.find({ batchYear: batchYear, dept: dept }).select({ students: 1 })
+        const studentRollNo = []
+        const marks = []
+        console.log(examType)
+        const data = await Batch.find({ batchYear: batchYear, dept: dept }).select({ students: 1 })
 
-    console.log(data[0])
-    for (let i = 0; i < data[0].students.length; i++) {
-        console.log(data[0].students[i])
-        // data[0].students.forEach(async (studs)=>{
-        studentRollNo[i] = data[0].students[i]
-        const student = await Student.find({ rollNo: studentRollNo[i] }).select({ name: 1, rollNo: 1, result: 1 })
-        // console.log(student[0].result[sem-1].subjectMarks)
-        for (let j = 0; j < student[0].result[sem - 1].subjectMarks.length; j++) {
-            if (student[0].result[sem - 1].subjectMarks[j].courseId == courseId) {
-                if (examType == "cat1") {
-                    marks[i] = student[0].result[sem - 1].subjectMarks[j].marks.cat1
-                }
-                else if (examType == "cat2") {
-                    marks[i] = student[0].result[sem - 1].subjectMarks[j].marks.cat2
-                }
-                else if (examType == "sem") {
-                    marks[i] = student[0].result[sem - 1].subjectMarks[j].marks.sem
-                }
-                else if (examType == "lab") {
-                    marks[i] = student[0].result[sem - 1].subjectMarks[j].marks.lab
+        console.log(data[0])
+        for (let i = 0; i < data[0].students.length; i++) {
+            console.log(data[0].students[i])
+            // data[0].students.forEach(async (studs)=>{
+            studentRollNo[i] = data[0].students[i]
+            const student = await Student.find({ rollNo: studentRollNo[i] }).select({ name: 1, rollNo: 1, result: 1 })
+            // console.log(student[0].result[sem-1].subjectMarks)
+            for (let j = 0; j < student[0].result[sem - 1].subjectMarks.length; j++) {
+                if (student[0].result[sem - 1].subjectMarks[j].courseId == courseId) {
+                    if (examType == "cat1") {
+                        marks[i] = student[0].result[sem - 1].subjectMarks[j].marks.cat1
+                    }
+                    else if (examType == "cat2") {
+                        marks[i] = student[0].result[sem - 1].subjectMarks[j].marks.cat2
+                    }
+                    else if (examType == "sem") {
+                        marks[i] = student[0].result[sem - 1].subjectMarks[j].marks.sem
+                    }
+                    else if (examType == "lab") {
+                        marks[i] = student[0].result[sem - 1].subjectMarks[j].marks.lab
+                    }
                 }
             }
+            // })
         }
-        // })
+        res.json({
+            studentRollNo: studentRollNo,
+            marks: marks
+        })
+    } catch (error) {
+        res.status(401).send(error)
     }
 
-    res.json({
-        studentRollNo: studentRollNo,
-        marks: marks
-    })
 })
 
 
