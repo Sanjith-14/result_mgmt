@@ -48,9 +48,20 @@ const Admin = item.Admin
 //Getting ready(Home page)..
 router.get('/', async (req, res) => {
     try {
-        const currentSem = 2
-        const rollNo = "20BEE100"
-        const stud = await Student.find({ rollNo: rollNo }).select({ result: 1 })
+
+        // Student.findOneAndUpdate({ rollNo: "20BIT300" }, { $push: { SGPA: 8.5 } }).then(() => {
+        //     console.log("added sgpa")
+        // })
+
+        // const stud = await Student.find({rollNo:"20BIT300"}).select({SGPA:1})
+        // const len = stud[0].SGPA.length
+        // var sum = 0;
+        // stud[0].SGPA.forEach(e => {
+        //     sum+=e
+        // });
+        // console.log(sum/len)
+
+
         res.status(200).json({
             message: "Welcome to Result Management system",
             // details: req.user //maybe the user details from middleware
@@ -328,7 +339,7 @@ router.get('/student-detail/:rollNo', verifyToken, async (req, res) => {
     try {
         if (req.user.role == "faculty" || req.user.role == "admin" || req.user.role == "student") {
             var rollNo = req.params.rollNo;
-            const dataItem = await Student.find({ rollNo: rollNo }).select({ result: 0 , CGPA:0,SGPA:0})
+            const dataItem = await Student.find({ rollNo: rollNo }).select({ result: 0, CGPA: 0, SGPA: 0 })
             // console.log(dataItem)
             if (dataItem.length == 0) {
                 res.json({
@@ -815,7 +826,7 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
             //     console.log("Deleted")
             // }
 
-            const del = await Enrollment.deleteMany({ batchYear: batchYear, department: department , semNo:currentSem })
+            const del = await Enrollment.deleteMany({ batchYear: batchYear, department: department, semNo: currentSem })
             console.log("Deleted..")
 
 
@@ -858,6 +869,14 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
 
 // Adding result to student
 router.put('/faculty-add-result', verifyToken, async (req, res) => {
+
+
+    async function getCredits(courseId) {
+        var course = await Course.find({ courseId: courseId }).select({ credit: 1, _id: 0 })
+        console.log(course)
+    }
+
+
     try {
         if (req.user.role == 'faculty') {
             // Give result structure to all students..
@@ -909,18 +928,18 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                     if (subtype[0].type == "theory" && temp.attendance > 75) {
                         mark = temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment
                     }
-                    else if(subtype[0].type == "theory" && temp.attendance < 75){
+                    else if (subtype[0].type == "theory" && temp.attendance < 75) {
                         mark = 10
                     }
-                    else if (subtype[0].type == "embedded" && temp.lab>50  && temp.attendance > 75) {
+                    else if (subtype[0].type == "embedded" && temp.lab > 50 && temp.attendance > 75) {
                         mark = (temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + temp.assignment) * 0.6 + (temp.lab * 0.4)
                     }
-                    else if(subtype[0].type == "embedded" && (temp.lab<50 || temp.attendance < 75)){
+                    else if (subtype[0].type == "embedded" && (temp.lab < 50 || temp.attendance < 75)) {
                         mark = 10
                     }
                     gradeInt = Math.ceil(mark / 10) - 1
 
-                    
+
                     // console.log(temp.cat1 + "+" + temp.cat2  + "+" + temp.sem + "20")
                     // console.log(Math.ceil((temp.cat1 * 0.4 + temp.cat2 * 0.4 + temp.sem * 0.4 + 20) / 10));
                     // console.log(grades[gradeInt])  //Gives A or O
@@ -936,7 +955,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
 
                     // upload cgpa to student
                     let post = 1
-                    const enroll = await Enrollment.find({ semNo: currentSem, department: studRollNo[i].substring(3, 5) , batchYear:batchYear })
+                    const enroll = await Enrollment.find({ semNo: currentSem, department: studRollNo[i].substring(3, 5), batchYear: batchYear })
                     for (let k = 0; k < enroll.length; k++) {
                         if (enroll[k].isCompleted == false) {
                             post = 0;
@@ -946,21 +965,37 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                     if (post == 1) {
                         let reGrade = [];
                         let sumGrad = 0
+                        let sumCredits = 0
                         let x;
                         for (x = 0; x < stud[0].result[currentSem - 1].subjectMarks.length; x++) {
+
+                            var course = await Course.find({ _id: stud[0].result[currentSem - 1].subjectMarks[x].courseId }).select({ credits: 1 })
+                            var credit = course[0].credits
+                            sumCredits += credit
+
                             reGrade[0] = stud[0].result[currentSem - 1].subjectMarks[x].marks.grade
                             var grad = reGrade[0] == 'O' ? 10 : reGrade[0] == 'A+' ? 9 : reGrade[0] == 'A' ? 8 : reGrade[0] == 'B+' ? 7 : reGrade[0] == 'B' ? 6 : 0  //just no changes to o :-(
-                            sumGrad += grad
+                            sumGrad += (grad * credit)
                         }
-                        var sgpa = sumGrad / x
-                        Student.findOneAndUpdate({ rollNo: studRollNo[i] }, { $push: { SGPA: sgpa } }).then(() => {
+                        var sgpa = sumGrad / sumCredits
+                        await Student.findOneAndUpdate({ rollNo: studRollNo[i] }, { $push: { SGPA: sgpa } }).then(() => {
                             console.log("added sgpa")
                         })
 
+                        const stud = await Student.find({ rollNo: studRollNo[i] }).select({ SGPA: 1 })
+                        const len = stud[0].SGPA.length
+                        var sum = 0;
+                        stud[0].SGPA.forEach(e => {
+                            sum += e
+                        });
+                        const cgpa = sum / len
+                        console.log("CGPA : "+ cgpa)
 
-                        
+                        await Student.findOneAndUpdate({ rollNo: studRollNo[i] }, { $set: { CGPA: cgpa } }).then(() => {
+                            console.log("added cgpa")
+                        })
+
                     }
-
 
                 }
 
@@ -1028,7 +1063,7 @@ router.get('/courses/:facultyId', verifyToken, async (req, res) => {
 router.get('/result/:RollNo', verifyToken, async (req, res) => {
     try {
         var rollNo = req.params.RollNo;
-        const dataItem = await Student.find({ rollNo: rollNo }).select({ result: 1 ,SGPA:1,CGPA:1})
+        const dataItem = await Student.find({ rollNo: rollNo }).select({ result: 1, SGPA: 1, CGPA: 1 })
         if (dataItem.length == 0) {
             res.status(200).json({
                 message: "No students are there"
@@ -1037,8 +1072,8 @@ router.get('/result/:RollNo', verifyToken, async (req, res) => {
         else {
             res.status(200).json({
                 result: dataItem[0].result,
-                SGPA:dataItem[0].SGPA,
-                CGPA:dataItem[0].CGPA
+                SGPA: dataItem[0].SGPA,
+                CGPA: dataItem[0].CGPA
             })
         }
 
