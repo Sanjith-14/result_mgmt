@@ -239,12 +239,12 @@ router.get('/get-mark', verifyToken, async (req, res) => {
 
         const studentRollNo = []
         const marks = []
-        console.log(examType)
+        // console.log(examType)
         const data = await Batch.find({ batchYear: batchYear, dept: dept }).select({ students: 1 })
 
-        console.log(data[0])
+        // console.log(data[0])
         for (let i = 0; i < data[0].students.length; i++) {
-            console.log(data[0].students[i])
+            // console.log(data[0].students[i])
             // data[0].students.forEach(async (studs)=>{
             studentRollNo[i] = data[0].students[i]
             const student = await Student.find({ rollNo: studentRollNo[i] }).select({ name: 1, rollNo: 1, result: 1 })
@@ -697,11 +697,11 @@ router.get('/courses/sem:semNo', verifyToken, async (req, res) => {
 })
 
 
-router.get('/courses/:courseId', verifyToken, async (req, res) => {
+router.get('/course/:courseId', verifyToken, async (req, res) => {
     try {
-        console.log(req.params.courseId)
+        // console.log(req.params.courseId)
         const dataItem = await Course.find({ _id: req.params.courseId })
-        console.log(dataItem)
+        // console.log(dataItem)
         if (dataItem.length == 0) {
             res.json({
                 course: []
@@ -872,7 +872,7 @@ router.put('/batch-add-course', verifyToken, async (req, res) => {
             // }
 
             const del = await Enrollment.deleteMany({ batchYear: batchYear, department: department, semNo: currentSem })
-            console.log("Deleted..")
+            // console.log("Deleted..")
 
 
             for (let i = 0; i < courseId.length; i++) {
@@ -951,7 +951,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                             break;
                         }
                     }
-                    console.log("index" + index);
+                    // console.log("index" + index);
 
                     var gradeInt;
 
@@ -1027,7 +1027,7 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
                             sum += e
                         });
                         const cgpa = sum / len
-                        console.log("CGPA : " + cgpa)
+                        // console.log("CGPA : " + cgpa)
 
                         await Student.findOneAndUpdate({ rollNo: studRollNo[i] }, { $set: { CGPA: cgpa } }).then(() => {
                             console.log("added cgpa")
@@ -1069,9 +1069,11 @@ router.put('/faculty-add-result', verifyToken, async (req, res) => {
 
 // To get courses based on faculty id
 router.get('/courses/:facultyId', verifyToken, async (req, res) => {
+    console.log(req.params.facultyId)
     try {
         if (req.user.role == 'faculty') {
             const dataItem = await Enrollment.find({ facultyId: req.params.facultyId })
+            console.log(dataItem)
             if (dataItem.length == 0) {
                 res.status(200).json({
                     classes: []
