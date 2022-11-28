@@ -723,9 +723,11 @@ router.get('/courses/:courseId', verifyToken, async (req, res) => {
 // Current course for students..
 router.get('/current-course', verifyToken, async (req, res) => {
     try {
-        const {batchYear , department} = req.body
-        const dataItem = await Batch.find({ batchYear:batchYear , dept:department }).select({currentCourses:1})
-        console.log(dataItem)
+        const rollNo = req.body.rollNo
+        const student = await Student.find({rollNo:rollNo}).select({batchYear:1,department:1})
+        const batchYear = student[0].batchYear
+        const dept = student[0].department
+        const dataItem = await Batch.find({ batchYear:batchYear , dept:dept }).select({currentCourses:1})
         if (dataItem.length == 0) {
             res.json({
                 currentCourse: []
@@ -734,7 +736,7 @@ router.get('/current-course', verifyToken, async (req, res) => {
         // console.log(dataItem.length())
         else {
             res.status(200).json({
-                currentCourse: dataItem[0]
+                currentCourse: dataItem[0].currentCourses
             })
         }
     }
