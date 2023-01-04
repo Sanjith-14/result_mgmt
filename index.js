@@ -2,6 +2,9 @@ const express = require('express')
 const mongoose = require('mongoose');
 const app = express()
 const router = require('./source/routes/routes')
+const admin_routes = require('./source/routes/admin_routes')
+const faculty_routes = require('./source/routes/faculty_routes')
+const student_routes = require('./source/routes/student_routes')
 
 
 
@@ -20,6 +23,11 @@ mongoose.connect(process.env.MONGODB_URL , ()=>{
 });
 
 app.use("/",router)
+app.use(admin_routes)
+app.use(faculty_routes)
+app.use(student_routes)
+
+
 // app.use(verifyToken)
 app.listen((process.env.PORT || 8080),()=>{
     console.log("Server is running..")
